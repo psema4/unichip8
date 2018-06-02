@@ -42,7 +42,7 @@ public class UniCHIP8 : MonoBehaviour {
 	//public GameObject[] prefabs; // RESERVED FOR NON-STANDARD UNITY3D INTEGRATION
 	
 	[Header("ROM")]
-	public string romFolder = "Assets/UCHIP8/Roms";
+	public string romFolder = "Assets/UniCHIP8/Roms";
 	public string romFilename = "";
 	
 	[Header("RAM")]
