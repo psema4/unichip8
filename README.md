@@ -28,18 +28,18 @@ A CHIP-8 implementation for Unity 3D
 * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 * http://mattmik.com/files/chip8/mastering/chip8.html
   
-# Tools
+## Tools
 
 * http://johnearnest.github.io/Octo/
   
-# ROMs
+## ROMs
 
 * https://web.archive.org/web/20130903155600/http://chip8.com/downloads/Chip-8%20Pack.zip
   
-# License
+## License
 
 MIT
   
-# Other
+## Other
 
 beep.wav is a modified beep-6.wav from the CC-0 "Interface beeps" collection https://opengameart.org/content/interface-beeps
