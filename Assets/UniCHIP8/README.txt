@@ -1,4 +1,4 @@
-UniCHIP8 alpha
+UniCHIP8
 
 A CHIP-8 implementation for Unity 3D
 
