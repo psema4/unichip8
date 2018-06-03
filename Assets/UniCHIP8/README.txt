@@ -13,7 +13,23 @@ Usage
   7. Ensure the UniCHIP8's Power State property is checked
   8. Position the camera near the quad so it takes up most of the view
   9. Press Play in the Unity Editor
-  
+
+Keyboard Layout
+
+  Original           QWERTY
+  +---+---+---+---+  +---+---+---+---+
+  | 1 | 2 | 3 | C |  | 1 | 2 | 3 | 4 |
+  +---+---+---+---+  +---+---+---+---+
+  | 4 | 5 | 6 | D |  | q | w | e | r |
+  +---+---+---+---+  +---+---+---+---+
+  | 7 | 8 | 9 | E |  | a | s | d | f |
+  +---+---+---+---+  +---+---+---+---+
+  | A | 0 | B | F |  | z | x | c | v |
+  +---+---+---+---+  +---+---+---+---+
+	
+Playing the Blitz rom
+  Press 'w' to proceed from the title and level screens.  Destroy buildings by dropping bombs with the 'w' key.
+
 Bugs
   https://github.com/psema4/unichip8/issues
 
