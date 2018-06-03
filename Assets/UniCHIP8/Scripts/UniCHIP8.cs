@@ -181,6 +181,17 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 	
 	void LoadROM() {
+		// FIXME: USE WriteString() or Octo
+		ram [10] = 84;  // T
+		ram [11] = 101; // e
+		ram [12] = 115; // s
+		ram [13] = 116; // t
+		ram [14] = 32;  // (space)
+		ram [15] = 67;  // C
+		ram [16] = 117; // u
+		ram [17] = 98;  // b
+		ram [18] = 101; // e
+
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
 			0x65, 0x03, // 6XNN -> SET V5 TO 3
@@ -207,8 +218,13 @@ public class UniCHIP8 : UniCHIP8Node {
 			0xF2, 0x29, // FX29 -> SET I to address of char in V2 (Ones Digit)
 			0xD3, 0x45, // DXYN -> DRAW char at V3,V4
 
-			0x0E, 0x00, // 0E00 -> UniCHIP EXTENSIONS TEST
-			0x12, 0x22  // 1NNN -> JUMP TO SELF (HALT)
+			0x0E, 0x00, // 0E00 -> UniCHIP8 EXTENSIONS TEST
+// FIXME
+// WriteString(0x010, "Test Cube")
+			0x60, 0x03, // 6003 -> Set V0 TO 3
+			0x0E, 0x10, // 0x10 -> MoveX "Test Cube" to V0 (3)
+
+//			0x12, 0x22  // 1NNN -> JUMP TO SELF (HALT)
 		};
 		
 		for (int i=0; i<programData.Length; i++)
@@ -295,6 +311,25 @@ public class UniCHIP8 : UniCHIP8Node {
 
 	static string ToHexString(ushort u) {
 		return "0x" + ToHex (u);
+	}
+
+	void WriteASCIIString(ushort address, string str) {
+		// FIXME
+		print ("WriteASCIIString STUB");
+	}
+
+	// FIXME: "Test Cube" as written to 0x010 in LoadROM() returns broken string "ube
+	//  Note: Breaks UniCHIP8Router's Command() handler at line 63 (logged output is cut off)  
+	string ReadASCIIString(ushort address, int maxLength) {
+		char[] chars = new char[maxLength];
+		string output = "";
+
+		for (int i=0; i < maxLength; i++) {
+			chars[i] = (char) ram[(address + i)];
+		}
+
+		output = new String (chars);
+		return output.Trim ();
 	}
 
 	void LogIteration(ushort opcode) {
@@ -387,10 +422,14 @@ public class UniCHIP8 : UniCHIP8Node {
 					SP -= 1;
 				}
 
+				// NON-STANDARD UNITY3D INTEGRATION OPCODES
 				if (! compatibilityMode) {
-					if ((opcode & 0x0F00) == 0x0E00) {	// 0E00: RESERVED FOR NON-STANDARD UNITY3D INTEGRATION
-						print ("UniCHIP8 Extensions: STUB");
+					print ("UniCHIP8 Extensions: STUB");
 
+					// Store an ascii string containing the target GameObject's name in ram[0] through ram[15] before using
+					// opcodes 0x0E1N through 0x0EFN
+
+					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 INTEGRATION TESTING
 						if (router != null) {
 							// transform a test object
 							router.SendMessage("Command", "Test Cube|move~0~0~4");
@@ -401,8 +440,8 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage("Command", this.name + "|move~0~0~0");
 							router.SendMessage("Command", this.name + "|scale~1~1~1");
 
-							// transform a non-existant object
-							router.SendMessage ("Command", "foo|move~0~0~0");
+							// translate a non-existant object
+							router.SendMessage ("Command", "nonexistent|move~0~0~0");
 
 							// send data
 							router.SendMessage ("Data", "Test Cube|Hello, World!");
@@ -410,6 +449,14 @@ public class UniCHIP8 : UniCHIP8Node {
 
 							router.SendMessage("Command", this.name + "|call~Beep");
 						}
+					}
+
+					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N MoveX target GameObject on X axis to value in V[N]
+						// read ram[0x10] through ram[0x15] for the target GameObject's name
+						string targetName = ReadASCIIString(0x010, 0xF);
+
+						print("Sending command: " + targetName + "|moveX~" + V[N]);
+						router.SendMessage("Command", targetName + "|moveX~" + V[N]);
 					}
 				}
 				break;
