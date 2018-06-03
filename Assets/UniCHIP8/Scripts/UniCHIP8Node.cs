@@ -15,7 +15,7 @@ public class UniCHIP8Node : MonoBehaviour {
 	virtual public void Execute(string commandData) {
 		// See UniCHIP8Router.cs for commandData format
 
-		print (name + " received commandData: " + commandData);
+		print ("\"" + name + "\" received commandData: " + commandData);
 
 		string[] parts = commandData.Split (new string[] { "~" }, System.StringSplitOptions.None);
 		string   args1s;
@@ -60,6 +60,6 @@ public class UniCHIP8Node : MonoBehaviour {
 	}
 
 	virtual public void Receive(string data) {
-		print (name + " received data: " + data);
+		print ("\"" + name + "\" received data: " + data);
 	}
 }

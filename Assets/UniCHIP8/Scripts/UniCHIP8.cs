@@ -182,15 +182,15 @@ public class UniCHIP8 : UniCHIP8Node {
 	
 	void LoadROM() {
 		// FIXME: USE WriteString() or Octo
-		ram [10] = 84;  // T
-		ram [11] = 101; // e
-		ram [12] = 115; // s
-		ram [13] = 116; // t
-		ram [14] = 32;  // (space)
-		ram [15] = 67;  // C
-		ram [16] = 117; // u
-		ram [17] = 98;  // b
-		ram [18] = 101; // e
+		ram [0x010] = 84;  // T
+		ram [0x011] = 101; // e
+		ram [0x012] = 115; // s
+		ram [0x013] = 116; // t
+		ram [0x014] = 32;  // (space)
+		ram [0x015] = 67;  // C
+		ram [0x016] = 117; // u
+		ram [0x017] = 98;  // b
+		ram [0x018] = 101; // e
 
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
@@ -318,15 +318,31 @@ public class UniCHIP8 : UniCHIP8Node {
 		print ("WriteASCIIString STUB");
 	}
 
-	// FIXME: "Test Cube" as written to 0x010 in LoadROM() returns broken string "ube
-	//  Note: Breaks UniCHIP8Router's Command() handler at line 63 (logged output is cut off)  
 	string ReadASCIIString(ushort address, int maxLength) {
-		char[] chars = new char[maxLength];
+		char[] tmpChars = new char[maxLength];
+		char[] chars;
+		int count = 0;
+		int i = 0;
 		string output = "";
 
-		for (int i=0; i < maxLength; i++) {
-			chars[i] = (char) ram[(address + i)];
+		// copy ascii chars, determine actual length of string data
+		for (i=0; i < maxLength; i++) {
+			char c = (char)ram [(address + i)];
+
+			if (((int)c > 31) && ((int)c < 127)) {
+				tmpChars [i] = c;
+				count++;
+
+			} else {
+				break;
+			}
 		}
+
+		// build & return the string
+		chars = new char[count];
+
+		for (i=0; i < count; i++)
+			chars [i] = tmpChars [i];
 
 		output = new String (chars);
 		return output.Trim ();
@@ -453,9 +469,8 @@ public class UniCHIP8 : UniCHIP8Node {
 
 					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N MoveX target GameObject on X axis to value in V[N]
 						// read ram[0x10] through ram[0x15] for the target GameObject's name
-						string targetName = ReadASCIIString(0x010, 0xF);
-
-						print("Sending command: " + targetName + "|moveX~" + V[N]);
+						string targetName = ReadASCIIString(0x10, 0xF);
+						//print("Sending command: " + targetName + "|moveX~" + V[N]);
 						router.SendMessage("Command", targetName + "|moveX~" + V[N]);
 					}
 				}
@@ -725,7 +740,7 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 
 	override public void Receive(string data) {
-		print (name + " received data: " + data + " (STUB: WRITE TO ram[] AND CALL AN INTERRUPT HANDLER!)");
+		print ("\"" + name + "\" received data: " + data + " (STUB: WRITE TO ram[] AND CALL AN INTERRUPT HANDLER!)");
 
 		// FIXME: Write data to ram[], then execute an "interrupt" to process the data (ie. handle GameObject collisions)
 	}
