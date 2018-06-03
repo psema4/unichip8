@@ -22,8 +22,17 @@ public class UniCHIP8Router : MonoBehaviour {
 	}
 
 
-	void RegisterNode(GameObject gameObject) {
-		gameObjects.Add (gameObject);
+	void RegisterNode(GameObject go) {
+		gameObjects.Add (go);
+	}
+
+	void UnregisterNode(GameObject go) {
+		gameObjects.Remove (go);
+	}
+
+	void DestroyNode(GameObject go) {
+		gameObjects.Remove (go);
+		Destroy (go);
 	}
 
 	private string[] ParseEnvelope(string data) {
@@ -31,6 +40,7 @@ public class UniCHIP8Router : MonoBehaviour {
 	}
 
 	void Command(string data) {
+		print ("COMMAND: " + data);
 		// Command Message Format:
 		//	Target Name | Command Data
 		//
@@ -55,7 +65,7 @@ public class UniCHIP8Router : MonoBehaviour {
 		string targetName = parts [0];
 		string commandData = parts [1];
 
-		GameObject target = gameObjects.Find (go => go.name == targetName);
+		GameObject target = gameObjects.Find (go => go != null && go.name == targetName);
 
 		if (target != null)
 			target.SendMessage ("Execute", commandData);
@@ -69,7 +79,7 @@ public class UniCHIP8Router : MonoBehaviour {
 		string targetName = parts [0];
 		string messageData = parts [1];
 		
-		GameObject target = gameObjects.Find (go => go.name == targetName);
+		GameObject target = gameObjects.Find (go => go != null && go.name == targetName);
 		
 		if (target != null)
 			target.SendMessage ("Receive", messageData);

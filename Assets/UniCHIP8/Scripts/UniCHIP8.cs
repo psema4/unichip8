@@ -49,7 +49,9 @@ public class UniCHIP8 : UniCHIP8Node {
 	public Color foregroundColor = Color.green;
 	public AudioClip speakerSound;
 	private AudioSource audioSource;
-	//private UniCHIP8Router router;
+
+	[Header("Scene Integration")]
+	public GameObject[] prefabs;
 
 	void Start () {
 		screenTexture = new Texture2D (64, 32);
@@ -191,19 +193,27 @@ public class UniCHIP8 : UniCHIP8Node {
 		ram [0x016] = 117; // u
 		ram [0x017] = 98;  // b
 		ram [0x018] = 101; // e
+		ram [0x019] = 0;   // (null terminator)
+		ram [0x01A] = 84;  // T
+		ram [0x01B] = 101; // e
+		ram [0x01C] = 115; // s
+		ram [0x01D] = 116; // t
+		ram [0x01E] = 32;  // (space)
+		ram [0x01F] = 50;  // 2
+		ram [0x020] = 0;   // (null terminator)
 
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
-			0x65, 0x03, // 6XNN -> SET V5 TO 3
+			0x65, 0x03, // 6XNN -> SET V5 to 3
 //			0xF5, 0x18, // 0x200: FX18 -> BEEP
 			
-			0x00, 0xE0, // 0x202: 00E0 -> CLEAR SCREEN
+			0x00, 0xE0, // 0x202: 00E0 -> CLEAR screen
 			
-			0xA0, 0x00, // ANNN -> SET I TO Address 000
-			0x60, 0x2A, // 6XNN -> SET V0 TO 42
+			0xA0, 0x00, // ANNN -> SET I to Address 000
+			0x60, 0x2A, // 6XNN -> SET V0 to 42
 			0xF0, 0x33, // FX33 -> STORE V0 (42) AS BCD AT I (000)
 			
-			0xF5, 0x65, // FX65 -> Load V5 (3) Registers V0-V2 from memory starting at I (Load the BCD values)
+			0xF5, 0x65, // FX65 -> LOAD V5 (3) Registers V0-V2 from memory starting at I (Load the BCD values)
 			
 			0x63, 0x01, // 6XNN -> SET V3 to 1
 			0x64, 0x01, // 6XNN -> SET V4 to 1
@@ -218,13 +228,97 @@ public class UniCHIP8 : UniCHIP8Node {
 			0xF2, 0x29, // FX29 -> SET I to address of char in V2 (Ones Digit)
 			0xD3, 0x45, // DXYN -> DRAW char at V3,V4
 
-			0x0E, 0x00, // 0E00 -> UniCHIP8 EXTENSIONS TEST
-// FIXME
-// WriteString(0x010, "Test Cube")
-			0x60, 0x03, // 6003 -> Set V0 TO 3
-			0x0E, 0x10, // 0x10 -> MoveX "Test Cube" to V0 (3)
+			// UniCHIP8 Extensions
+			0x0E, 0x00, // 0E00 -> extensions test
 
-//			0x12, 0x22  // 1NNN -> JUMP TO SELF (HALT)
+			// create target object from a prefab
+			//0x60, 0x00, // 6XNN -> SET V0 to 0
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010: starting address for target GameObject name, "Test Cube"
+			//0x0E, 0xA0, // 0EA0 -> instantiate "Test Cube" from the prefab in prefabs[0]
+
+			// or, create target object from primitive
+			0xA0, 0x10, // ANNN -> SET I to address 0x010
+			0x0E, 0xB0, // 0EB0 -> createCube "Test Cube"
+
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010
+			//0x0E, 0xB1, // 0EB1 -> createSphere "Test Cube"
+
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010
+			//0x0E, 0xB2, // 0EB2 -> createCylinder "Test Cube"
+
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010
+			//0x0E, 0xB3, // 0EB3 -> createCapsule "Test Cube"
+
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010
+			//0x0E, 0xB4, // 0EB4 -> createPlane "Test Cube"
+
+			//0xA0, 0x10, // ANNN -> SET I to address 0x010
+			//0x0E, 0xB5, // 0EB5 -> createQuad "Test Cube"
+
+			// move target object
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x60, 0x03, // 6XNN -> Set V0 to 3
+			0x0E, 0x10, // 0E1N -> moveX "Test Cube" to V[0] (3)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x60, 0x01, // 6XNN -> Set V0 to 1
+			0x0E, 0x20, // 0E2N -> moveY "Test Cube" to V[0] (1)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x60, 0x02, // 6XNN -> Set V0 to 2
+			0x0E, 0x30, // 0E3N -> moveZ "Test Cube" to V[0] (2)
+
+			// rotate target object
+			0x60, 0x2D, // 6XNN -> Set V0 TO 45
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x40, // 0E4N -> rotateX "Test Cube" to V[0] (45)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x50, // 0E5N -> rotateY "Test Cube" to V[0] (45)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x60, // 0E6N -> rotateZ "Test Cube" to V[0] (45)
+
+			// scale target object
+			0x60, 0x02, // 6XNN -> Set V0 TO 2
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x70, // 0E7N -> scaleX "Test Cube" to V[0] (2)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x80, // 0E8N -> scaleY "Test Cube" to V[0] (2)
+
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0x90, // 0E9N -> scaleZ "Test Cube" to V[0] (2)
+
+			// destroy target object
+			0xA0, 0x10,	// ANNN -> SET I to address 0x010
+			0x0E, 0xBF, // 0xBF -> destroy "Test Cube"
+
+
+			// create a different object
+			0xA0, 0x1A, // ANNN -> SET I to address 0x01A: starting address for target GameObject name, "Test 2"
+			0x0E, 0xB2, // 0EB2 -> createCylinder "Test 2"
+
+			0x60, 0x03, // 6XNN -> Set V0 to 3
+			0x61, 0x02, // 6XNN -> Set V1 to 2
+			0x62, 0x01, // 6XNN -> Set V2 to 1
+			0xA0, 0x1A, // ANNN -> SET I to address 0x01A
+			0x0E, 0xB6, // 0EB6 -> move "Test 2" to Vector3(1, 2, 3)
+
+			0x60, 0x00, // 6XNN -> Set V0 to 0
+			0x61, 0x00, // 6XNN -> Set V1 to 0
+			0x62, 0x2D, // 6XNN -> Set V2 to 45
+			0xA0, 0x1A, // ANNN -> SET I to address 0x01A
+			0x0E, 0xB7, // 0EB6 -> rotate "Test 2" to Vector3(0, 0, 45)
+
+			0x60, 0x02, // 6XNN -> Set V0 to 2
+			0x61, 0x02, // 6XNN -> Set V1 to 2
+			0x62, 0x02, // 6XNN -> Set V2 to 2
+			0xA0, 0x1A, // ANNN -> SET I to address 0x01A
+			0x0E, 0xB8, // 0EB6 -> scale "Test 2" to Vector3(2, 2, 2)
+
+			0xA0, 0x1A,	// ANNN -> SET I to address 0x01A
+			0x0E, 0xBF, // 0xBF -> destroy "Test 2"
 		};
 		
 		for (int i=0; i<programData.Length; i++)
@@ -318,11 +412,12 @@ public class UniCHIP8 : UniCHIP8Node {
 		print ("WriteASCIIString STUB");
 	}
 
-	string ReadASCIIString(ushort address, int maxLength) {
+	string ReadASCIIString(ushort address) {
+		int maxLength = 32;
+		int length = 0;
+		int i = 0;
 		char[] tmpChars = new char[maxLength];
 		char[] chars;
-		int count = 0;
-		int i = 0;
 		string output = "";
 
 		// copy ascii chars, determine actual length of string data
@@ -331,7 +426,7 @@ public class UniCHIP8 : UniCHIP8Node {
 
 			if (((int)c > 31) && ((int)c < 127)) {
 				tmpChars [i] = c;
-				count++;
+				length++;
 
 			} else {
 				break;
@@ -339,9 +434,9 @@ public class UniCHIP8 : UniCHIP8Node {
 		}
 
 		// build & return the string
-		chars = new char[count];
+		chars = new char[length];
 
-		for (i=0; i < count; i++)
+		for (i=0; i < length; i++)
 			chars [i] = tmpChars [i];
 
 		output = new String (chars);
@@ -438,41 +533,165 @@ public class UniCHIP8 : UniCHIP8Node {
 					SP -= 1;
 				}
 
-				// NON-STANDARD UNITY3D INTEGRATION OPCODES
+				// Unity integration opcodes
 				if (! compatibilityMode) {
-					print ("UniCHIP8 Extensions: STUB");
+					// opcodes 0x0E00 through 0x0EFF expect a target gameObject.name, stored in ram[] as a
+					// null-terminated ascii string upto 32 characters in length; SET I to the starting
+					// address of the string before executing opcodes in this range.
 
-					// Store an ascii string containing the target GameObject's name in ram[0] through ram[15] before using
-					// opcodes 0x0E1N through 0x0EFN
+					// opcodes 0x0EB6 through 0x0EB8 also expect values in V0, V1, and V2; these are used
+					// to construct a Vector3 for the transformations.  FIXME: encode as floats in V0
+					// through VB (4 bytes per float), support negative values
 
-					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 INTEGRATION TESTING
+					string targetName = ReadASCIIString(I);
+
+					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 router test
 						if (router != null) {
-							// transform a test object
-							router.SendMessage("Command", "Test Cube|move~0~0~4");
-							router.SendMessage("Command", "Test Cube|rotate~0~45~0");
-							router.SendMessage("Command", "Test Cube|scale~1~10~1");
-
-							// transform our own GameObject (UniCHIP8 inherits from UniCHIP8Node)
-							router.SendMessage("Command", this.name + "|move~0~0~0");
-							router.SendMessage("Command", this.name + "|scale~1~1~1");
-
-							// translate a non-existant object
-							router.SendMessage ("Command", "nonexistent|move~0~0~0");
-
-							// send data
-							router.SendMessage ("Data", "Test Cube|Hello, World!");
-							router.SendMessage ("Data", this.name + "|Hello, World too!");
-
 							router.SendMessage("Command", this.name + "|call~Beep");
+
+							/* Other examples:
+								// transform a test object
+								router.SendMessage("Command", "Test Cube|move~0~0~4");
+								router.SendMessage("Command", "Test Cube|rotate~0~45~0");
+								router.SendMessage("Command", "Test Cube|scale~1~10~1");
+
+								// transform our own GameObject (UniCHIP8 inherits from UniCHIP8Node)
+								router.SendMessage("Command", this.name + "|move~0~0~0");
+								router.SendMessage("Command", this.name + "|scale~1~1~1");
+
+								// translate a non-existent object
+								router.SendMessage ("Command", "nonexistent|move~0~0~0");
+								
+								// send data
+								router.SendMessage ("Data", "Test Cube|Hello, World!");
+								router.SendMessage ("Data", this.name + "|Hello, World too!");
+
+								router.SendMessage("Command", "Bridge 21|call~Explode");
+							*/
 						}
 					}
 
-					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N MoveX target GameObject on X axis to value in V[N]
-						// read ram[0x10] through ram[0x15] for the target GameObject's name
-						string targetName = ReadASCIIString(0x10, 0xF);
-						//print("Sending command: " + targetName + "|moveX~" + V[N]);
+					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N (moveX) targetGameObject.transform.position.x = V[N]
 						router.SendMessage("Command", targetName + "|moveX~" + V[N]);
 					}
+
+					else if ((opcode & 0x0FF0) == 0x0E20) { // 0E2N (moveY) targetGameObject.transform.position.y = V[N]
+						router.SendMessage("Command", targetName + "|moveY~" + V[N]);
+					}
+					
+					else if ((opcode & 0x0FF0) == 0x0E30) { // 0E3N (moveZ) targetGameObject.transform.position.z = V[N]
+						router.SendMessage("Command", targetName + "|moveZ~" + V[N]);
+					}
+					
+					else if ((opcode & 0x0FF0) == 0x0E40) { // 0E4N (rotateX) targetGameObject.transform.localRotation.x = V[N]
+						router.SendMessage("Command", targetName + "|rotateX~" + V[N]);
+					}
+					
+					else if ((opcode & 0x0FF0) == 0x0E50) { // 0E5N (rotateY) targetGameObject.transform.localRotation.y = V[N]
+						router.SendMessage("Command", targetName + "|rotateY~" + V[N]);
+					}
+					
+					else if ((opcode & 0x0FF0) == 0x0E60) { // 0E6N (rotateZ) targetGameObject.transform.localRotation.z = V[N]
+						router.SendMessage("Command", targetName + "|rotateZ~" + V[N]);
+					}
+
+					else if ((opcode & 0x0FF0) == 0x0E70) { // 0E7N (scaleX) targetGameObject.transform.localScale.x = V[N]
+						router.SendMessage("Command", targetName + "|scaleX~" + V[N]);
+					}
+
+					else if ((opcode & 0x0FF0) == 0x0E80) { // 0E8N (scaleY) targetGameObject.transform.localScale.y = V[N]
+						router.SendMessage("Command", targetName + "|scaleY~" + V[N]);
+					}
+
+					else if ((opcode & 0x0FF0) == 0x0E90) { // 0E9N (scaleZ) targetGameObject.transform.localScale.z = V[N]
+						router.SendMessage("Command", targetName + "|scaleZ~" + V[N]);
+					}
+
+					else if ((opcode & 0x0FF0) == 0x0EA0) { // 0EAN (create) targetGameObject from prefabs[V[N]]
+						int prefabIndex = V[N];
+
+						if (prefabs[prefabIndex] != null) {
+							GameObject go = (GameObject) Instantiate(prefabs[prefabIndex], new Vector3(0, 0, 0), Quaternion.identity);
+							go.name = targetName;
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB0) { // 0EB0 (createCube) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB1) { // 0EB1 (createSphere) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB2) { // 0EB2 (createCylinder) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB3) { // 0EB3 (createCapsule) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB4) { // 0EB4 (createPlane) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Plane);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB5) { // 0EB5 (createQuad) targetGameObject
+						GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+						go.name = targetName;
+						go.transform.position = new Vector3(0, 0, 0);
+						go.AddComponent<UniCHIP8Node>();
+						go.GetComponent<UniCHIP8Node>().router = router;
+						router.SendMessage("RegisterNode", go);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB6) { // 0EB6 (move) targetGameObject.position = new Vector3(V[0],V[1],V[2])
+						router.SendMessage("Command", targetName + "|move~" + V[0] + "~" + V[1] + "~" + V[2]);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EB7) { // 0EB7 (rotate) targetGameObject.transform.localRotation = new Vector3(V[0],V[1],V[2])
+						router.SendMessage("Command", targetName + "|rotate~" + V[0] + "~" + V[1] + "~" + V[2]);
+					}
+					
+					else if ((opcode & 0x0FFF) == 0x0EB8) { // 0EB8 (scale) targetGameObject.transform.localScale = new Vector3(V[0],V[1],V[2])
+						router.SendMessage("Command", targetName + "|scale~" + V[0] + "~" + V[1] + "~" + V[2]);
+					}
+					
+					// 0EB8..0EBE
+					
+					else if ((opcode & 0x0FFF) == 0x0EBF) { // 0EBF (destroy) targetGameObject
+						router.SendMessage ("Command", targetName + "|destroy");
+					}
+
+					// 0EC0..0EFF
 				}
 				break;
 				
