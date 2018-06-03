@@ -7,10 +7,11 @@ using System.IO;
 
 // A CHIP-8 Implementation for Unity 3D
 
-public class UniCHIP8 : MonoBehaviour {
+public class UniCHIP8 : UniCHIP8Node {
 	[Header("Machine State")]
 	public bool powerState;
 	public int clockMultiplier = 1;
+	public bool compatibilityMode = true;
 	public bool logging = false;
 	private int tickCount;
 	private bool waitingForKeypress;
@@ -30,17 +31,7 @@ public class UniCHIP8 : MonoBehaviour {
 	public byte ST;
 	public byte SP;
 	public ushort[] Stack;
-	
-	[Header("Unity Integration")]
-	public GameObject screenObject;
-	private Texture2D screenTexture;
-	public Color backgroundColor = Color.black;
-	public Color foregroundColor = Color.green;
-	public AudioClip speakerSound;
-	private AudioSource audioSource;
-	public bool compatibilityMode = true;
-	//public GameObject[] prefabs; // RESERVED FOR NON-STANDARD UNITY3D INTEGRATION
-	
+
 	[Header("ROM")]
 	public string romFolder = "Assets/UniCHIP8/Roms";
 	public string romFilename = "";
@@ -50,7 +41,16 @@ public class UniCHIP8 : MonoBehaviour {
 	public ushort fontDataStart = 0xD7F;
 	public byte[] ram;
 	public byte[] vram;
-	
+
+	[Header("Hardware")]
+	public GameObject screenObject;
+	private Texture2D screenTexture;
+	public Color backgroundColor = Color.black;
+	public Color foregroundColor = Color.green;
+	public AudioClip speakerSound;
+	private AudioSource audioSource;
+	//private UniCHIP8Router router;
+
 	void Start () {
 		screenTexture = new Texture2D (64, 32);
 		screenObject.GetComponent<Renderer> ().material.mainTexture = screenTexture;
@@ -84,6 +84,10 @@ public class UniCHIP8 : MonoBehaviour {
 			LoadROMFromFile (romFolder + "/" + romFilename);
 		
 		waitingForKeypress = false;
+
+		if (router != null) {
+			router.BroadcastMessage("RegisterNode", gameObject);
+		}
 	}
 	
 	void Beep() {
@@ -180,7 +184,7 @@ public class UniCHIP8 : MonoBehaviour {
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
 			0x65, 0x03, // 6XNN -> SET V5 TO 3
-			0xF5, 0x18, // 0x200: FX18 -> BEEP
+//			0xF5, 0x18, // 0x200: FX18 -> BEEP
 			
 			0x00, 0xE0, // 0x202: 00E0 -> CLEAR SCREEN
 			
@@ -202,7 +206,8 @@ public class UniCHIP8 : MonoBehaviour {
 			0x73, 0x05, // 7XNN -> ADD 5 to V3
 			0xF2, 0x29, // FX29 -> SET I to address of char in V2 (Ones Digit)
 			0xD3, 0x45, // DXYN -> DRAW char at V3,V4
-			
+
+			0x0E, 0x00, // 0E00 -> UniCHIP EXTENSIONS TEST
 			0x12, 0x22  // 1NNN -> JUMP TO SELF (HALT)
 		};
 		
@@ -385,6 +390,26 @@ public class UniCHIP8 : MonoBehaviour {
 				if (! compatibilityMode) {
 					if ((opcode & 0x0F00) == 0x0E00) {	// 0E00: RESERVED FOR NON-STANDARD UNITY3D INTEGRATION
 						print ("UniCHIP8 Extensions: STUB");
+
+						if (router != null) {
+							// transform a test object
+							router.SendMessage("Command", "Test Cube|move~0~0~4");
+							router.SendMessage("Command", "Test Cube|rotate~0~45~0");
+							router.SendMessage("Command", "Test Cube|scale~1~10~1");
+
+							// transform our own GameObject (UniCHIP8 inherits from UniCHIP8Node)
+							router.SendMessage("Command", this.name + "|move~0~0~0");
+							router.SendMessage("Command", this.name + "|scale~1~1~1");
+
+							// transform a non-existant object
+							router.SendMessage ("Command", "foo|move~0~0~0");
+
+							// send data
+							router.SendMessage ("Data", "Test Cube|Hello, World!");
+							router.SendMessage ("Data", this.name + "|Hello, World too!");
+
+							router.SendMessage("Command", this.name + "|call~Beep");
+						}
 					}
 				}
 				break;
@@ -650,5 +675,11 @@ public class UniCHIP8 : MonoBehaviour {
 			
 			RenderScreen();
 		} // end iteration
+	}
+
+	override public void Receive(string data) {
+		print (name + " received data: " + data + " (STUB: WRITE TO ram[] AND CALL AN INTERRUPT HANDLER!)");
+
+		// FIXME: Write data to ram[], then execute an "interrupt" to process the data (ie. handle GameObject collisions)
 	}
 }
