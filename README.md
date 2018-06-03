@@ -6,7 +6,7 @@ A CHIP-8 implementation for Unity 3D
 
 ## Usage
 
-1. Import the UniCHIP asset package into your project
+1. Import [the UniCHIP asset package](https://github.com/psema4/unichip8/raw/master/PackageBuild/UniCHIP8.unitypackage) into your project
 1. Create a quad and assign the UniCHIP8Screen material to it
 1. Create an empty GameObject and add the UniCHIP8.cs script to it
 1. Assign your screen quad to UniCHIP8's Screen Object property
