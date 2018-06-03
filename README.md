@@ -1,6 +1,6 @@
 # UniCHIP8
 
-A CHIP-8 implementation for Unity 3D
+A CHIP-8 implementation for Unity 3D based on Laurence Muller's tutorial, "[How to write an emulator (CHIP-8 interpreter)](http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/)"
 
 ![UniCHIP8 version 1.0 screenshot](/Assets/UniCHIP8/unichip8-v1.png?raw=true "UniCHIP8 Version 1.0")
 

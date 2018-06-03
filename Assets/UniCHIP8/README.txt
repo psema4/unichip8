@@ -1,9 +1,8 @@
 UniCHIP8
 
-A CHIP-8 implementation for Unity 3D
+A CHIP-8 implementation for Unity 3D based on Laurence Muller's tutorial, "How to write an emulator (CHIP-8 interpreter)" http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/
 
 Usage
-
   1. Import the UniCHIP asset package into your project
   2. Create a quad and assign the UniCHIP8Screen material to it
   3. Create an empty GameObject and add the UniCHIP8.cs script to it
