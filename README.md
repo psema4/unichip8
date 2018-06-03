@@ -2,6 +2,8 @@
 
 A CHIP-8 implementation for Unity 3D
 
+![UniCHIP8 version 1.0 screenshot](/Assets/UniCHIP8/unichip8-v1.png?raw=true "UniCHIP8 Version 1.0")
+
 ## Usage
 
 1. Import the UniCHIP asset package into your project
