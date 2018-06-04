@@ -579,54 +579,11 @@ public class UniCHIP8 : UniCHIP8Node {
 
 				// Unity integration opcodes
 				if (! compatibilityMode) {
-					// opcodes 0x0E00 through 0x0EFF expect a target gameObject.name, stored in ram[] as a
-					// null-terminated ascii string upto 32 characters in length; SET I to the starting
-					// address of the string before executing opcodes in this range.
-
-					// opcodes 0x0EB6 through 0x0EB8 also expect values in V0, V1, and V2; these are used
-					// to construct a Vector3 for the transformations.
-				
-					// FIXME: encode as floats in V0 through VB (4 bytes per float), support negative values
-					// and values larger than 256 in general (ie. a byte)
-					//
-					// opcode 0x0EB9 expects the address of a string in V0 and V1; this is the name of the
-					// GameObject to parent to.
-					//
-					// opcode 0x0EBB expects an rgba value in V0, V1, V2, and V3
-					//
-					// opcode 0x0EF9 uses V0 as a flag (0/non-zero) to enable or disable UniCHIP8 logging
-					//
-					// opcode 0x0EFA uses V0 as a flag (0/non-zero) to enable or disable CHIP-8 Compatibility
-					// mode.  Compabibility mode must be disabled to use UniCHIP8 extensions.
-					//
-					// opcode 0x0EFB sets the clock multiplier to value in V0
-
 					string targetName = ReadASCIIString(I);
 
 					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 router test
-						if (router != null) {
+						if (router != null)
 							router.SendMessage("Command", this.name + "|call~Beep");
-
-							/* Other examples:
-								// transform a test object
-								router.SendMessage("Command", "Test Cube|move~0~0~4");
-								router.SendMessage("Command", "Test Cube|rotate~0~45~0");
-								router.SendMessage("Command", "Test Cube|scale~1~10~1");
-
-								// transform our own GameObject (UniCHIP8 inherits from UniCHIP8Node)
-								router.SendMessage("Command", this.name + "|move~0~0~0");
-								router.SendMessage("Command", this.name + "|scale~1~1~1");
-
-								// translate a non-existent object
-								router.SendMessage ("Command", "nonexistent|move~0~0~0");
-								
-								// send data
-								router.SendMessage ("Data", "Test Cube|Hello, World!");
-								router.SendMessage ("Data", this.name + "|Hello, World too!");
-
-								router.SendMessage("Command", "Bridge 21|call~Explode");
-							*/
-						}
 					}
 
 					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N (moveX) targetGameObject.transform.position.x = V[N]
@@ -674,7 +631,7 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage("Command", targetName + "|scaleZ~" + V[N]);
 					}
 
-					else if ((opcode & 0x0FF0) == 0x0EA0) { // 0EAN (create) targetGameObject from prefabs[V[N]]
+					else if ((opcode & 0x0FF0) == 0x0EA0) { // 0EAN (create) create targetGameObject from prefabs[V[N]]
 						if (router != null) {
 							int prefabIndex = V[N];
 							GameObject go = (GameObject) Instantiate(prefabs[prefabIndex], new Vector3(0, 0, 0), Quaternion.identity);
@@ -685,7 +642,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB0) { // 0EB0 (createCube) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB0) { // 0EB0 (createCube) create targetGameObject from a cube primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
 							go.name = targetName;
@@ -696,7 +653,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB1) { // 0EB1 (createSphere) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB1) { // 0EB1 (createSphere) create targetGameObject from a sphere primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
 							go.name = targetName;
@@ -707,7 +664,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB2) { // 0EB2 (createCylinder) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB2) { // 0EB2 (createCylinder) create targetGameObject from a cylinder primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
 							go.name = targetName;
@@ -718,7 +675,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB3) { // 0EB3 (createCapsule) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB3) { // 0EB3 (createCapsule) create targetGameObject from a capsule primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
 							go.name = targetName;
@@ -729,7 +686,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB4) { // 0EB4 (createPlane) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB4) { // 0EB4 (createPlane) create targetGameObject from a plane primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Plane);
 							go.name = targetName;
@@ -740,7 +697,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB5) { // 0EB5 (createQuad) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EB5) { // 0EB5 (createQuad) create targetGameObject from a quad primitive
 						if (router != null) {
 							GameObject go = GameObject.CreatePrimitive(PrimitiveType.Quad);
 							go.name = targetName;
@@ -766,20 +723,20 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage("Command", targetName + "|scale~" + V[0] + "~" + V[1] + "~" + V[2]);
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EB9) { // 0EB9 (reparent) targetGameObject to parentGameObject (name string address stored
-						if (router != null) {				//      in V0 and V1
+					else if ((opcode & 0x0FFF) == 0x0EB9) { // 0EB9 (reparent) targetGameObject to parentGameObject, whose name is stored in the string at address pointed to by V0 and V1
+						if (router != null) {
 							ushort stringAddress = (ushort) (((ushort) V[0] << 8) | (ushort) V[1]);
 							string parentTarget = ReadASCIIString(stringAddress);
 							router.SendMessage("Command", targetName + "|reparent~" + parentTarget);
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EBA) { // 0EBA (addMaterial) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EBA) { // 0EBA (addMaterial) adds a specular material to targetGameObject
 						if (router != null)
 							router.SendMessage("Command", targetName + "|addMaterial");
 					}
 					
-					else if ((opcode & 0x0FFF) == 0x0EBB) { // 0EBB (setMaterialColor) targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EBB) { // 0EBB (setMaterialColor) sets the targetGameObject main material color
 						if (router != null)
 							router.SendMessage("Command", targetName + "|setMaterialColor~" + V[0] + "~" + V[1] + "~" + V[2] + "~" + V[3]);
 					}
@@ -814,8 +771,8 @@ public class UniCHIP8 : UniCHIP8Node {
 						logging = (V[0] > 0) ? true : false;
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EFA) { // 0EFA (compatibilityMode) set the compatiblity mode using V0 as flag
-						compatibilityMode = (V[0] > 0) ? true : false; // true == Standard CHIP-8, false == CHIP-8 + Unity 3D Extensions
+					else if ((opcode & 0x0FFF) == 0x0EFA) { // 0EFA (compatibilityMode) enable CHIP-8 compatibility
+						compatibilityMode = true;			//		note: compatibilityMode must be false to use this opcode
 					}
 
 					else if ((opcode & 0x0FFF) == 0x0EFB) { // 0EFB (clockMultiplier) set the clock multiplier specified in V0
@@ -830,7 +787,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						Halt ("program halted");
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EFE) { // 0EFE (reset) registers to their initial power on states. Any
+					else if ((opcode & 0x0FFF) == 0x0EFE) { // 0EFE (reset) resets registers to their initial power on states. Any
 						Reset ();                           //      GameObjects previously created via an associated
 					}										//      UniCHIP8Router, and having their .destroyOnReset
 															//      properties set to true will be destroyed. (By default
@@ -838,7 +795,7 @@ public class UniCHIP8 : UniCHIP8Node {
 															//      destroyOnReset to false so the virtual machine does not
 															//      get destroyed.)
 					
-					else if ((opcode & 0x0FFF) == 0x0EFF) { // 0EFF (powerDown) Simulates a power down and resets the system
+					else if ((opcode & 0x0FFF) == 0x0EFF) { // 0EFF (powerDown) simulates a power down and resets the system
 						ClearScreen();
 						Halt ("power down");
 
