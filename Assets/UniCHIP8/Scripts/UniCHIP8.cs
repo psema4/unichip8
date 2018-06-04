@@ -522,7 +522,12 @@ public class UniCHIP8 : UniCHIP8Node {
 
 		// Set clockMultiplier > 1 to process multiple opcodes per FixedUpdate()
 		for (int iteration = 0; iteration < clockMultiplier; iteration++) {
-			bool keyboardFocused = (!proximityKeyboard) || (1f < proximityDistance);
+			float proximityTargetDistance = 1000f;
+
+			if (proximityKeyboard && proximityTarget != null)
+				proximityTargetDistance = Vector3.Distance(proximityTarget.transform.position, transform.position);
+
+			bool keyboardFocused = (!proximityKeyboard) || (proximityTargetDistance < proximityDistance);
 
 			if (hasKeyboard && keyboardFocused) {
 				// Handle Keys
