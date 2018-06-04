@@ -2,15 +2,14 @@
 using System.Collections;
 
 public class UniCHIP8Node : MonoBehaviour {
-	[Header("Message Routing")]
-	public UniCHIP8Router router;
-	public bool destroyOnReset = true;
+	[Header("Extensions Network")]
+	[Tooltip("The router managing this GameObjects' UniCHIP8 Extensions network.")] public UniCHIP8Router router;
+	[Tooltip("Should this GameObject be destroyed when the router receives a reset command?")] public bool destroyOnReset = true;
 
 	// Use this for initialization
 	void Start () {
-		if (router != null) {
+		if (router != null)
 			router.SendMessage("RegisterNode", gameObject);
-		}
 	}
 
 	virtual public void Execute(string commandData) {

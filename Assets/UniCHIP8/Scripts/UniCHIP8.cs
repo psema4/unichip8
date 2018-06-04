@@ -9,10 +9,10 @@ using System.IO;
 
 public class UniCHIP8 : UniCHIP8Node {
 	[Header("Machine State")]
-	public bool powerState;
-	public int clockMultiplier = 1;
-	public bool compatibilityMode = true;
-	public bool logging = false;
+	[Tooltip("Enable or disable the UniCHIP8.")] public bool powerState;
+	[Tooltip("The number of iterations (clock ticks) per FixedUpdate.")] public int clockMultiplier = 1;
+	[Tooltip("Enable or disable strict CHIP-8 compatibility. This must be disabled to use UniCHIP8 Extensions.")] public bool compatibilityMode = true;
+	[Tooltip("Log register state on every clock tick.")] public bool logging = false;
 	private int tickCount;
 	private bool waitingForKeypress;
 	private int waitingRegister;
@@ -24,46 +24,49 @@ public class UniCHIP8 : UniCHIP8Node {
 	};
 	
 	[Header("Registers")]
-	public byte[] V;
-	public ushort I;
-	public ushort PC;
-	public byte DT;
-	public byte ST;
-	public byte SP;
-	public ushort[] Stack;
+	[Tooltip("General Registers")] public byte[] V;
+	[Tooltip("Address Register")] public ushort I;
+	[Tooltip("Program Counter")] public ushort PC;
+	[Tooltip("Delay Timer")] public byte DT;
+	[Tooltip("Sound Timer")] public byte ST;
+	[Tooltip("Stack Pointer")] public byte SP;
+	[Tooltip("Call Stack")] public ushort[] Stack;
 
 	[Header("Virtual Hardware")]
-	public bool hasKeyboard = true;
-	[ConditionalHide("hasKeyboard", true)] public bool proximityKeyboard = false;
-	[ConditionalHide("proximityKeyboard", true)] public GameObject proximityTarget;
-	[ConditionalHide("proximityKeyboard", true)] public float proximityDistance = 3f;
+	[Tooltip("Enable or disable keyboard input.")] public bool hasKeyboard = true;
+	[ConditionalHide("hasKeyboard", true)] [Tooltip("Enable keyboard input when a GameObject (ie. the player) is near.")] public bool proximityKeyboard = false;
+	[ConditionalHide("proximityKeyboard", true)] [Tooltip("The GameObject to test for proximity.")] public GameObject proximityTarget;
+	[ConditionalHide("proximityKeyboard", true)] [Tooltip("The distance between the UniCHIP8 and the target GameObject that is considered to be near.")] public float proximityDistance = 3f;
+	[Space(10)]
 	
-	public bool hasScreen = true;
+	[Tooltip("Enable or disable the screen.")] public bool hasScreen = true;
 	private Texture2D screenTexture;
-	[ConditionalHide("hasScreen", true)] public GameObject screenObject;
-	[ConditionalHide("hasScreen", true)] public Color backgroundColor = Color.black;
-	[ConditionalHide("hasScreen", true)] public Color foregroundColor = Color.green;
-	
-	public bool hasSpeaker = true;
+	[ConditionalHide("hasScreen", true)] [Tooltip("The screen model in your scene, having a UniCHIP8Screen material.")] public GameObject screenObject;
+	[ConditionalHide("hasScreen", true)] [Tooltip("Select the screen's background color.")] public Color backgroundColor = Color.black;
+	[ConditionalHide("hasScreen", true)] [Tooltip("Select the screen's foreground color.")] public Color foregroundColor = Color.green;
+	[Space(10)]
+
+	[Tooltip("Enable or disable the speaker.")] public bool hasSpeaker = true;
 	private AudioSource audioSource;
-	[ConditionalHide("hasSpeaker", true)] public AudioClip speakerSound;
+	[ConditionalHide("hasSpeaker", true)] [Tooltip("The sound played on system beep.")] public AudioClip speakerSound;
+	[Space(10)]
 	
-	public bool hasDataPort = true;
-	[ConditionalHide("hasDataPort", true)] public ushort dataPortAddress = 0xD50;
-	[ConditionalHide("hasDataPort", true)] public byte dataPortSize = 32;
-	
-	[Header("Scene Integration")]
-	public GameObject[] prefabs;
+	[Tooltip("Enable or disable the data port.")] public bool hasDataPort = true;
+	[ConditionalHide("hasDataPort", true)] [Tooltip("The address in RAM at which data will be used for I/O.")] public ushort dataPortAddress = 0xD50;
+	[ConditionalHide("hasDataPort", true)] [Tooltip("The number of bytes available for I/O data.")] public byte dataPortSize = 32;
 
 	[Header("ROM")]
-	public string romFolder = "Assets/UniCHIP8/Roms";
-	public string romFilename = "";
+	[Tooltip("The location in your project where ROM files can be found.")] public string romFolder = "Assets/UniCHIP8/Roms";
+	[Tooltip("The filename (including extension) of the ROM file to boot when the UniCHIP8 is powered on.")] public string romFilename = "";
 	
 	[Header("RAM")]
-	public ushort bootAddress = 0x200;
-	public ushort fontDataStart = 0xD7F;
-	public byte[] ram;
-	public byte[] vram;
+	[Tooltip("The Program Counter is initialized to begin executing at this address when powered on.")] public ushort bootAddress = 0x200;
+	[Tooltip("The location of the CHIP-8 font data.")] public ushort fontDataStart = 0xD7F;
+	[Tooltip("View RAM state at runtime by pausing the Unity Editor and expanding this array.")] public byte[] ram;
+	[Tooltip("View Video RAM state at runtime by pausing the Unity Editor and expanding this array.")] public byte[] vram;
+
+	[Header("Scene Integration")]
+	[Tooltip("These prefabs are made available to the UniCHIP8 Extension opcode, \"create\".")] public GameObject[] prefabs;
 
 	void Start () {
 		GetComponent<UniCHIP8Node>().destroyOnReset = false;
