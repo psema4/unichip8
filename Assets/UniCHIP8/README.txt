@@ -84,6 +84,8 @@ opcode  mnemonic          description
 0EBA    addMaterial       adds a specular material to targetGameObject
 0EBB    setMaterialColor  sets the targetGameObject main material color
 ...
+0EF0    send              send the bytes in the dataport to the targetGameObject
+...
 0EF9    logging           enable or disable logging using V0 as flag
 0EFA    compatibilityMode enable CHIP-8 compatibility
 0EFB    clockMultiplier   set the clock multiplier specified in V0

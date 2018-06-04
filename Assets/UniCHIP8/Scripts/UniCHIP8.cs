@@ -275,6 +275,7 @@ public class UniCHIP8 : UniCHIP8Node {
 	void LoadROM() {
 		WriteASCIIString (0x010, "Test Cube");
 		WriteASCIIString (0x01A, "Test 2");
+		WriteASCIIString (0x021, "Blue CPU");
 
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
@@ -304,6 +305,8 @@ public class UniCHIP8 : UniCHIP8Node {
 			// UniCHIP8 Extensions
 			0x0E, 0x00, // 0E00 -> extensions test
 
+			// transformation tests
+/*
 			// create target object from a prefab
 			//0x60, 0x00, // 6XNN -> SET V0 to 0
 			//0xA0, 0x10, // ANNN -> SET I to address 0x010: starting address for target GameObject name, "Test Cube"
@@ -408,8 +411,21 @@ public class UniCHIP8 : UniCHIP8Node {
 			0x61, 0x10, // 6XNN -> SET V1 to 0x10
 			0xA0, 0x1A, // ANNN -> SET I to address 0x01A
 			0x0E, 0xB9, // 0EB9 -> reparent "Test 2" to "Test Cube"
+*/
 
-			// machine state
+			// network data transfer tests
+			0x60, 0x4E, // 6XNN -> SET V0 to 78   // N
+			0x61, 0x65, // 6XNN -> SET V1 to 101  // e
+			0x62, 0x74, // 6XNN -> SET V2 to 116  // t
+			0x63, 0x00, // 6XNN -> SET V3 to 0    // (terminator)
+			0x64, 0x04, // 6XNN -> SET V3 to 4
+			0xAD, 0x50, // ANNN -> SET I to the default UniCHIP8 data port address
+			0xF4, 0x55, // FX55 -> STORE V4 (4) registers (V0-V3) to the data port buffer
+			0xA0, 0x21, // ANNN -> SET I to address 0x021
+			0x0E, 0xF0, // 0EF0 -> send contents of the data port buffer ("Net") to "Blue CPU"
+
+			// machine state tests
+/*
 			//0x60, 0x01, // 6XNN -> SET V0 to 1
 			//0x0E, 0xF9, // 0EF9 -> enable logging
 
@@ -423,6 +439,7 @@ public class UniCHIP8 : UniCHIP8Node {
 			//0x0E, 0xFD, // 0EFD -> halt
 			//0x0E, 0xFE, // 0EFE -> reset
 			//0x0E, 0xFF, // 0EFF -> powerDown
+*/
 		};
 
 		for (int i=0; i<programData.Length; i++)
@@ -667,7 +684,7 @@ public class UniCHIP8 : UniCHIP8Node {
 					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 router test
 						if (router != null) {
 							router.SendMessage("Command", this.name + "|call~Beep");
-							router.SendMessage("Data", this.name + "|Hello World!");
+							//router.SendMessage("Data", this.name + "|Hello World!");
 						}
 					}
 
@@ -850,7 +867,12 @@ public class UniCHIP8 : UniCHIP8Node {
 
 					// 0EC0..0EEF
 
-					// 0EF0..0EF8
+					else if ((opcode & 0x0FFF) == 0x0EF0) { // 0EF0 (send) send the bytes in the dataport to the targetGameObject
+						string data = ReadASCIIString(dataPortAddress);
+						router.SendMessage ("Data", targetName + "|" + data);
+					}
+
+					// 0EF1..0EF8
 
 					else if ((opcode & 0x0FFF) == 0x0EF9) { // 0EF9 (logging) enable or disable logging using V0 as flag
 						logging = (V[0] > 0) ? true : false;
@@ -1108,8 +1130,11 @@ public class UniCHIP8 : UniCHIP8Node {
 				}
 				
 				else if ((opcode & NN) == 0x0055) {		// FX55 Dump V0 through Vx to addresses I through I+x
-					for (int i = 0; i < V[X]; i++)
+					byte numRegistersToStore = (byte) (V[X] & 0x0F);
+
+					for (int i = 0; i <= numRegistersToStore; i++) {
 						ram [I + i] = (byte)V [i];
+					}
 				}
 				
 				else if ((opcode & NN) == 0x0065) {		// FX65 Read V0 through Vx from addresses I through I+VX
@@ -1160,7 +1185,7 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 
 	override public void Receive(string data) {
-		print ("\"" + name + "\" received data: " + data + " (STUB: CALL AN INTERRUPT HANDLER!)");
+		print ("\"" + name + "\" received data: \"" + data + "\" (STUB: CALL AN INTERRUPT HANDLER!)");
 		
 		if (hasDataPort) {
 			WriteASCIIString(dataPortAddress, data);
