@@ -53,7 +53,7 @@ The UniCHIP8Node component provides a basic command interpreter for the commands
 
 * UniCHIP8 Router command arguments are drawn from byte sources (the V registers), limiting numeric values to the positive integers from 0 to 255
 * Transform commands do not take Time.deltaTime into account
-* When adding a material to a GameObject, that material will use the "Legacy Shaders/Specular" shader.
+* When adding a material to a GameObject, that material will default to the "Standard" shader.
 
 ### Calling Extensions
 

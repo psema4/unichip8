@@ -121,7 +121,7 @@ public class UniCHIP8Node : MonoBehaviour {
 			break;
 
 		case "addMaterial":
-			renderer.material = new Material(Shader.Find ("Specular"));
+			renderer.material = new Material(Shader.Find ("Standard"));
 			break;
 
 		case "setMaterialColor":
