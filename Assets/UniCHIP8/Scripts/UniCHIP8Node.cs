@@ -17,15 +17,22 @@ public class UniCHIP8Node : MonoBehaviour {
 
 		print ("\"" + name + "\" received commandData: " + commandData);
 
-		// FIXME: router is null
-
+		// arguments processing
 		string[] parts = commandData.Split (new string[] { "~" }, System.StringSplitOptions.None);
 		string   args1s;
 		float    args1f;
 		Vector3  args3f;
 
+		// helpers
 		Vector3 tmpVec3;
+		Renderer renderer = gameObject.GetComponent<Renderer>();
+		int r;
+		int g;
+		int b;
+		int a;
+		Color color;
 
+		// execute
 		switch (parts [0]) {
 		// transform commands
 		case "move":
@@ -102,6 +109,33 @@ public class UniCHIP8Node : MonoBehaviour {
 			args1s = parts[1];
 			gameObject.SendMessage(args1s);
 			break;
+
+		case "reparent":
+			args1s = parts[1];
+			GameObject parentObject = GameObject.Find(args1s);
+			
+			if (parentObject != null)
+				gameObject.transform.SetParent(parentObject.transform);
+
+			break;
+
+		case "addMaterial":
+			renderer.material = new Material(Shader.Find ("Specular"));
+			break;
+
+		case "setMaterialColor":
+			r = int.Parse(parts[1]);
+			g = int.Parse(parts[2]);
+			b = int.Parse(parts[3]);
+			a = int.Parse(parts[4]);
+
+			print ("Creating new Color(" + r + ", " + g + ", " + b + ", " + a + ")");
+
+			color = new Color(r, g, b, a);
+			renderer.material.color = color;
+			break;
+
+
 
 		case "unregister":
 			router.SendMessage("UnregisterNode", gameObject);

@@ -40,22 +40,39 @@ public class UniCHIP8Router : MonoBehaviour {
 	}
 
 	void Command(string data) {
-		print ("COMMAND: " + data);
 		// Command Message Format:
 		//	Target Name | Command Data
 		//
-		// Transform-Command Data Format:
-		//	verb ~ float ~ float ~ float
+		// Command Data formats are tilde-separated strings. The first record is a command verb, the remainder are arguments.
 		//
-		//	where verb is one of: move, rotate or scale
+		// Transform-Command Data Format (args: 1 float):
+		//  verb~(float value)
 		//
-		//`Example:
+		// 	  where verb is one of: moveX, moveY, moveZ,
+		//                          rotateX, rotateY,rotateZ, 
+		//                          scaleX, scaleY, scaleZ
 		//
-		//	Test Cube|rotate~0~45~0
+		//    example:
+		//	    Test Cube|moveX~3
+		//
+		//
+		// Transform-Command Data Format (args: 3 floats [a Vector3]):
+		//
+		//	verb~(float x)~(float y)~(float z)
+		//
+		//	  where verb is one of: move, rotate or scale
+		//
+		//`   example:
+		//	    Test Cube|rotate~0~45~0
+		//
 		//
 		// Other Command Data Formats
 		//
-		//	call ~ method name
+		//	call~(string methodName)
+		//  reparent~(string parentName)
+		//  addMaterial (void)
+		//  setMaterialColor~(int r, int g, int b, float a)
+		//  destroy (void)
 		//
 		// Example:
 		//
