@@ -3,25 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class UniCHIP8Router : MonoBehaviour {
-
-	private static UniCHIP8Router _instance;
-	public UniCHIP8Router Instance { get { return _instance; } }
-
+	
 	public List<GameObject> gameObjects;
 	
 	void Awake () {
 		gameObjects = new List<GameObject> ();
-
-		if (_instance == null)
-			_instance = this;
-
-		else if (_instance != this)
-			Destroy(gameObject.GetComponent(_instance.GetType()));
-
-		DontDestroyOnLoad(gameObject);
 	}
-
-
+	
 	void RegisterNode(GameObject go) {
 		gameObjects.Add (go);
 	}
@@ -36,7 +24,10 @@ public class UniCHIP8Router : MonoBehaviour {
 	}
 
 	void Reset() {
-		gameObjects.ForEach( go => { if (go != null && go.GetComponent<UniCHIP8Node>().destroyOnReset) DestroyNode (go); } );
+		gameObjects.ForEach( go => {
+			if (go != null && go.GetComponent<UniCHIP8Node>().destroyOnReset)
+				DestroyNode (go);
+		} );
 	}
 
 	private string[] ParseEnvelope(string data) {
