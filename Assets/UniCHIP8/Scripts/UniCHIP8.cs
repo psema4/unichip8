@@ -54,10 +54,20 @@ public class UniCHIP8 : UniCHIP8Node {
 	public GameObject[] prefabs;
 
 	void Start () {
+		GetComponent<UniCHIP8Node>().destroyOnReset = false;
+
 		screenTexture = new Texture2D (64, 32);
 		screenObject.GetComponent<Renderer> ().material.mainTexture = screenTexture;
 		audioSource = GetComponent<AudioSource> ();
-		
+
+		if (router != null) {
+			router.BroadcastMessage("RegisterNode", gameObject);
+		}
+
+		Reset();
+	}
+
+	void Reset() {
 		PC = (ushort) bootAddress;
 		SP = 0;
 		I  = 0;
@@ -81,15 +91,11 @@ public class UniCHIP8 : UniCHIP8Node {
 		
 		if (romFilename == "")
 			LoadROM ();
-			
+		
 		else
 			LoadROMFromFile (romFolder + "/" + romFilename);
 		
 		waitingForKeypress = false;
-
-		if (router != null) {
-			router.BroadcastMessage("RegisterNode", gameObject);
-		}
 	}
 	
 	void Beep() {
@@ -335,25 +341,32 @@ public class UniCHIP8 : UniCHIP8Node {
 			0x61, 0x10, // 6XNN -> SET V1 to 0x10
 			0xA0, 0x1A, // ANNN -> SET I to address 0x01A
 			0x0E, 0xB9, // 0EB9 -> reparent "Test 2" to "Test Cube"
+
+			// machine state
+			//0x60, 0x01, // 6XNN -> SET V0 to 1
+			//0x0E, 0xF9, // 0EF9 -> enable logging
+
+			//0x60, 0x01, // 6XNN -> SET V0 to 1
+			//0x0E, 0xFA, // 0EFA -> enable compatibility mode
+
+			//0x60, 0x05, // 6XNN -> SET V0 to 5
+			//0x0E, 0xFB, // 0EFB -> SET clock multiplier to 5
+
+			//0x0E, 0xFC, // 0EFC -> pause
+			//0x0E, 0xFD, // 0EFD -> halt
+			//0x0E, 0xFE, // 0EFE -> reset
+			//0x0E, 0xFF, // 0EFF -> powerDown
 		};
 
 		for (int i=0; i<programData.Length; i++)
 			ram[0x200 + i] = programData[i];
 
-		// hang at end of program (if length <= 255 opcodes) using a jump-to-self opcode
-		if (programData.Length <= 0xFF) {
-			ram [(0x200 + programData.Length)] = 0x12;
-			ram [(0x200 + programData.Length + 1)] = (byte)programData.Length;
+		// halt at end of program
+		ram [(0x200 + programData.Length)] = 0x0E;
+		ram [(0x200 + programData.Length + 1)] = 0xFD;
 
-			if (logging)
-				print ("LoadROM: wrote " + (programData.Length + 2) + " bytes to RAM");
-
-		} else {
-			// FIXME: build opcode using 12 bit addresses (we're only using the least significant byte above)
-
-			if (logging)
-				print ("LoadROM: wrote " + programData.Length + " bytes to RAM");
-		}
+		if (logging)
+			print ("LoadROM: wrote " + (programData.Length + 2) + " bytes to RAM");
 	}
 	
 	void LoadROMFromFile(string path) {
@@ -580,6 +593,13 @@ public class UniCHIP8 : UniCHIP8Node {
 					// GameObject to parent to.
 					//
 					// opcode 0x0EBB expects an rgba value in V0, V1, V2, and V3
+					//
+					// opcode 0x0EF9 uses V0 as a flag (0/non-zero) to enable or disable UniCHIP8 logging
+					//
+					// opcode 0x0EFA uses V0 as a flag (0/non-zero) to enable or disable CHIP-8 Compatibility
+					// mode.  Compabibility mode must be disabled to use UniCHIP8 extensions.
+					//
+					// opcode 0x0EFB sets the clock multiplier to value in V0
 
 					string targetName = ReadASCIIString(I);
 
@@ -786,7 +806,47 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage ("Command", targetName + "|destroy");
 					}
 
-					// 0EC0..0EFF
+					// 0EC0..0EEF
+
+					// 0EF0..0EF8
+
+					else if ((opcode & 0x0FFF) == 0x0EF9) { // 0EF9 (logging) enable or disable logging using V0 as flag
+						logging = (V[0] > 0) ? true : false;
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EFA) { // 0EFA (compatibilityMode) set the compatiblity mode using V0 as flag
+						compatibilityMode = (V[0] > 0) ? true : false; // true == Standard CHIP-8, false == CHIP-8 + Unity 3D Extensions
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EFB) { // 0EFB (clockMultiplier) set the clock multiplier specified in V0
+						clockMultiplier = V[0];
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EFC) { // 0EFC (pause) set manual breakpoints in code
+						Halt("program paused");
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EFD) { // 0EFD (halt) an alias for pause
+						Halt ("program halted");
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EFE) { // 0EFE (reset) registers to their initial power on states. Any
+						Reset ();                           //      GameObjects previously created via an associated
+					}										//      UniCHIP8Router, and having their .destroyOnReset
+															//      properties set to true will be destroyed. (By default
+															//      UniCHIP8, which inherits from UniCHIP8Node, sets it's
+															//      destroyOnReset to false so the virtual machine does not
+															//      get destroyed.)
+					
+					else if ((opcode & 0x0FFF) == 0x0EFF) { // 0EFF (powerDown) Simulates a power down and resets the system
+						ClearScreen();
+						Halt ("power down");
+
+						Reset ();
+
+						if (router != null)
+							router.SendMessage("Reset");
+					}
 				}
 				break;
 				

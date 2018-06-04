@@ -35,6 +35,10 @@ public class UniCHIP8Router : MonoBehaviour {
 		Destroy (go);
 	}
 
+	void Reset() {
+		gameObjects.ForEach( go => { if (go != null && go.GetComponent<UniCHIP8Node>().destroyOnReset) DestroyNode (go); } );
+	}
+
 	private string[] ParseEnvelope(string data) {
 		return data.Split (new string[] { "|" }, System.StringSplitOptions.None);
 	}

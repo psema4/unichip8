@@ -4,6 +4,7 @@ using System.Collections;
 public class UniCHIP8Node : MonoBehaviour {
 	[Header("Message Routing")]
 	public UniCHIP8Router router;
+	public bool destroyOnReset = true;
 
 	// Use this for initialization
 	void Start () {
@@ -15,7 +16,7 @@ public class UniCHIP8Node : MonoBehaviour {
 	virtual public void Execute(string commandData) {
 		// See UniCHIP8Router.cs for commandData format
 
-		print ("\"" + name + "\" received commandData: " + commandData);
+		//print ("\"" + name + "\" received commandData: " + commandData);
 
 		// arguments processing
 		string[] parts = commandData.Split (new string[] { "~" }, System.StringSplitOptions.None);
@@ -128,8 +129,6 @@ public class UniCHIP8Node : MonoBehaviour {
 			g = int.Parse(parts[2]);
 			b = int.Parse(parts[3]);
 			a = int.Parse(parts[4]);
-
-			print ("Creating new Color(" + r + ", " + g + ", " + b + ", " + a + ")");
 
 			color = new Color(r, g, b, a);
 			renderer.material.color = color;
