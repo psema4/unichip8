@@ -32,6 +32,29 @@ public class UniCHIP8 : UniCHIP8Node {
 	public byte SP;
 	public ushort[] Stack;
 
+	[Header("Virtual Hardware")]
+	public bool hasKeyboard = true;
+	[ConditionalHide("hasKeyboard", true)] public bool proximityKeyboard = false;
+	[ConditionalHide("proximityKeyboard", true)] public GameObject proximityTarget;
+	[ConditionalHide("proximityKeyboard", true)] public float proximityDistance = 3f;
+	
+	public bool hasScreen = true;
+	private Texture2D screenTexture;
+	[ConditionalHide("hasScreen", true)] public GameObject screenObject;
+	[ConditionalHide("hasScreen", true)] public Color backgroundColor = Color.black;
+	[ConditionalHide("hasScreen", true)] public Color foregroundColor = Color.green;
+	
+	public bool hasSpeaker = true;
+	private AudioSource audioSource;
+	[ConditionalHide("hasSpeaker", true)] public AudioClip speakerSound;
+	
+	public bool hasDataPort = true;
+	[ConditionalHide("hasDataPort", true)] public ushort dataPortAddress = 0xD50;
+	[ConditionalHide("hasDataPort", true)] public byte dataPortSize = 32;
+	
+	[Header("Scene Integration")]
+	public GameObject[] prefabs;
+
 	[Header("ROM")]
 	public string romFolder = "Assets/UniCHIP8/Roms";
 	public string romFilename = "";
@@ -41,17 +64,6 @@ public class UniCHIP8 : UniCHIP8Node {
 	public ushort fontDataStart = 0xD7F;
 	public byte[] ram;
 	public byte[] vram;
-
-	[Header("Hardware")]
-	public GameObject screenObject;
-	private Texture2D screenTexture;
-	public Color backgroundColor = Color.black;
-	public Color foregroundColor = Color.green;
-	public AudioClip speakerSound;
-	private AudioSource audioSource;
-
-	[Header("Scene Integration")]
-	public GameObject[] prefabs;
 
 	void Start () {
 		GetComponent<UniCHIP8Node>().destroyOnReset = false;
@@ -99,10 +111,14 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 	
 	void Beep() {
-		if (speakerSound == null)
-			print ("BEEP");
+		if (ST < 3)
+			ST = 3;
 
-		else
+		if (! hasSpeaker || speakerSound == null)
+			if (logging)
+				print ("BEEP");
+
+		else if (hasSpeaker && speakerSound != null)
 			audioSource.PlayOneShot (speakerSound, 1F);
 	}
 	
@@ -114,20 +130,22 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 	
 	void RenderScreen() {
-		int i = 0;
-		int j = 64 * 31; // Textures are bottom-to-top not top-to-bottom; skip to last row
-		Color[] screenData = new Color[2048];
-		
-		for (int y=0; y<32; y++) {
-			for (int x = 0; x < 64; x++) {
-				byte srcByte = vram[i++];
-				screenData[j++] = srcByte > 0 ? foregroundColor : backgroundColor;
-			}
+		if (hasScreen) {
+			int i = 0;
+			int j = 64 * 31; // Textures are bottom-to-top not top-to-bottom; skip to last row
+			Color[] screenData = new Color[2048];
 			
-			j -= 128; // go to start of previous row (64 bytes-per-row)
+			for (int y=0; y<32; y++) {
+				for (int x = 0; x < 64; x++) {
+					byte srcByte = vram [i++];
+					screenData [j++] = srcByte > 0 ? foregroundColor : backgroundColor;
+				}
+				
+				j -= 128; // go to start of previous row (64 bytes-per-row)
+			}
+			screenTexture.SetPixels (screenData);
+			screenTexture.Apply ();
 		}
-		screenTexture.SetPixels (screenData);
-		screenTexture.Apply ();
 	}
 	
 	bool SetPixel(int x, int y) {
@@ -189,31 +207,14 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 	
 	void LoadROM() {
-		// FIXME: USE WriteString() or Octo
-		ram [0x010] = 84;  // T
-		ram [0x011] = 101; // e
-		ram [0x012] = 115; // s
-		ram [0x013] = 116; // t
-		ram [0x014] = 32;  // (space)
-		ram [0x015] = 67;  // C
-		ram [0x016] = 117; // u
-		ram [0x017] = 98;  // b
-		ram [0x018] = 101; // e
-		ram [0x019] = 0;   // (null terminator)
-		ram [0x01A] = 84;  // T
-		ram [0x01B] = 101; // e
-		ram [0x01C] = 115; // s
-		ram [0x01D] = 116; // t
-		ram [0x01E] = 32;  // (space)
-		ram [0x01F] = 50;  // 2
-		ram [0x020] = 0;   // (null terminator)
+		WriteASCIIString (0x010, "Test Cube");
+		WriteASCIIString (0x01A, "Test 2");
 
 		// Draws a BCD number (042) to the top-left of the texture
 		byte[] programData = new byte[] {
 			0x65, 0x03, // 6XNN -> SET V5 to 3
-//			0xF5, 0x18, // 0x200: FX18 -> BEEP
-			
-			0x00, 0xE0, // 0x202: 00E0 -> CLEAR screen
+			0xF5, 0x18, // FX18 -> BEEP			
+			0x00, 0xE0, // 00E0 -> CLEAR screen
 			
 			0xA0, 0x00, // ANNN -> SET I to Address 000
 			0x60, 0x2A, // 6XNN -> SET V0 to 42
@@ -452,8 +453,15 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 
 	void WriteASCIIString(ushort address, string str) {
-		// FIXME
-		print ("WriteASCIIString STUB");
+		int length = str.Length;
+
+		if (length > 31)
+			length = 31;
+
+		for (int i=0; i<length; i++)
+			ram [(address + i)] = (byte) str [i];
+
+		ram[(address + length + 1)] = 0; // add terminal null byte
 	}
 
 	string ReadASCIIString(ushort address) {
@@ -514,24 +522,28 @@ public class UniCHIP8 : UniCHIP8Node {
 
 		// Set clockMultiplier > 1 to process multiple opcodes per FixedUpdate()
 		for (int iteration = 0; iteration < clockMultiplier; iteration++) {
-			// Handle Keys
-			Keys [ 0] = Input.GetKey ("x");
-			Keys [ 1] = Input.GetKey ("1");
-			Keys [ 2] = Input.GetKey ("2");
-			Keys [ 3] = Input.GetKey ("3");
-			Keys [ 4] = Input.GetKey ("q");
-			Keys [ 5] = Input.GetKey ("w");
-			Keys [ 6] = Input.GetKey ("e");
-			Keys [ 7] = Input.GetKey ("a");
-			Keys [ 8] = Input.GetKey ("s");
-			Keys [ 9] = Input.GetKey ("d");
-			Keys [10] = Input.GetKey ("z");
-			Keys [11] = Input.GetKey ("c");
-			Keys [12] = Input.GetKey ("4");
-			Keys [13] = Input.GetKey ("r");
-			Keys [14] = Input.GetKey ("f");
-			Keys [15] = Input.GetKey ("v");
-			
+			bool keyboardFocused = (!proximityKeyboard) || (1f < proximityDistance);
+
+			if (hasKeyboard && keyboardFocused) {
+				// Handle Keys
+				Keys [ 0] = Input.GetKey ("x");
+				Keys [ 1] = Input.GetKey ("1");
+				Keys [ 2] = Input.GetKey ("2");
+				Keys [ 3] = Input.GetKey ("3");
+				Keys [ 4] = Input.GetKey ("q");
+				Keys [ 5] = Input.GetKey ("w");
+				Keys [ 6] = Input.GetKey ("e");
+				Keys [ 7] = Input.GetKey ("a");
+				Keys [ 8] = Input.GetKey ("s");
+				Keys [ 9] = Input.GetKey ("d");
+				Keys [10] = Input.GetKey ("z");
+				Keys [11] = Input.GetKey ("c");
+				Keys [12] = Input.GetKey ("4");
+				Keys [13] = Input.GetKey ("r");
+				Keys [14] = Input.GetKey ("f");
+				Keys [15] = Input.GetKey ("v");
+			}
+
 			if (waitingForKeypress) {
 				for (int k=0; k < Keys.Length; k++) {
 					if (Keys[k] == true) {
@@ -582,8 +594,10 @@ public class UniCHIP8 : UniCHIP8Node {
 					string targetName = ReadASCIIString(I);
 
 					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 router test
-						if (router != null)
+						if (router != null) {
 							router.SendMessage("Command", this.name + "|call~Beep");
+							router.SendMessage("Data", this.name + "|Hello World!");
+						}
 					}
 
 					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N (moveX) targetGameObject.transform.position.x = V[N]
@@ -1075,8 +1089,11 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 
 	override public void Receive(string data) {
-		print ("\"" + name + "\" received data: " + data + " (STUB: WRITE TO ram[] AND CALL AN INTERRUPT HANDLER!)");
-
-		// FIXME: Write data to ram[], then execute an "interrupt" to process the data (ie. handle GameObject collisions)
+		print ("\"" + name + "\" received data: " + data + " (STUB: CALL AN INTERRUPT HANDLER!)");
+		
+		if (hasDataPort) {
+			WriteASCIIString(dataPortAddress, data);
+			// execute an "interrupt" to process the data (ie. handle GameObject collisions)
+		}
 	}
 }
