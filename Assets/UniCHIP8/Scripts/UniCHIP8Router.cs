@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class UniCHIP8Router : MonoBehaviour {
 	
-	[Tooltip("The list of nodes in this routers' network.")] public List<GameObject> gameObjects;
+	[Tooltip("The list of nodes in this routers' network.")]
+	public List<GameObject> gameObjects;
 	
 	void Awake () {
 		gameObjects = new List<GameObject> ();
