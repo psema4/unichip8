@@ -2,7 +2,7 @@
 
 A CHIP-8 implementation for Unity 3D based on Laurence Muller's tutorial, "[How to write an emulator (CHIP-8 interpreter)](http://www.multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/)"
 
-![UniCHIP8 version 1.0 screenshot](/Assets/UniCHIP8/unichip8-v1.png?raw=true "UniCHIP8 Version 1.0")
+<img src="https://raw.githubusercontent.com/psema4/unichip8/feature/unity-integration/Assets/UniCHIP8/unichip8-v1.png" width="640" />
 
 ## Usage
 
@@ -18,17 +18,12 @@ A CHIP-8 implementation for Unity 3D based on Laurence Muller's tutorial, "[How 
 
 ## Keyboard Layout
 
-    Original           QWERTY
-    +---+---+---+---+  +---+---+---+---+
-    | 1 | 2 | 3 | C |  | 1 | 2 | 3 | 4 |
-    +---+---+---+---+  +---+---+---+---+
-    | 4 | 5 | 6 | D |  | q | w | e | r |
-    +---+---+---+---+  +---+---+---+---+
-    | 7 | 8 | 9 | E |  | a | s | d | f |
-    +---+---+---+---+  +---+---+---+---+
-    | A | 0 | B | F |  | z | x | c | v |
-    +---+---+---+---+  +---+---+---+---+
-
+    Chip8 Key   Keyboard
+    ---------   ---------
+     1 2 3 C     1 2 3 4
+     4 5 6 D     q w e r
+     7 8 9 E     a s d f
+     A 0 B F     z x c v
 	
 ## Playing the Blitz rom
 
@@ -125,7 +120,7 @@ The UniCHIP8Node component provides a basic command interpreter for the commands
   
 ## Tools
 
-* [Octo fork, modified for UniCHIP8](https://github.com/psema4/Octo/tree/feature/UniCHIP8)
+* Modified [Octo compiler for UniCHIP8](https://github.com/psema4/Octo/tree/feature/UniCHIP8)
   
 ## ROMs
 
