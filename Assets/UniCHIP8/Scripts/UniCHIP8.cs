@@ -463,6 +463,8 @@ public class UniCHIP8 : UniCHIP8Node {
 		int j = 0;
 		byte[] tmp = new byte[ram.Length];
 		tmp = reader.ReadBytes (fileSize);
+		reader.Close ();
+		stream.Close ();
 		
 		for (int i=bootAddress; i < ram.Length; i++) {
 			if (j < tmp.Length)
@@ -735,6 +737,7 @@ public class UniCHIP8 : UniCHIP8Node {
 
 					else if ((opcode & 0x0FF0) == 0x0EA0) { // 0EAN (create) create targetGameObject from prefabs[V[N]]
 						if (router != null) {
+							print ("0EAN: Loading prefab index from V[" + N + "]");
 							int prefabIndex = V[N];
 							GameObject go = (GameObject) Instantiate(prefabs[prefabIndex], new Vector3(0, 0, 0), Quaternion.identity);
 							go.name = targetName;
@@ -833,7 +836,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EBA) { // 0EBA (addMaterial) adds a specular material to targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0EBA) { // 0EBA (addMaterial) adds a material to targetGameObject
 						if (router != null)
 							router.SendMessage("Command", targetName + "|addMaterial");
 					}
@@ -853,11 +856,11 @@ public class UniCHIP8 : UniCHIP8Node {
 						if (router != null)
 							router.SendMessage("Command", targetName + "|");
 					}
-					
-					else if ((opcode & 0x0FFF) == 0x0EBF) { // 0EBF () targetGameObject
+
+					else if ((opcode & 0x0FFF) == 0x0EBE) { // 0EBE () targetGameObject
 						if (router != null)
 							router.SendMessage("Command", targetName + "|");
-					}
+					}					
 					*/
 
 					else if ((opcode & 0x0FFF) == 0x0EBF) { // 0EBF (destroy) targetGameObject
