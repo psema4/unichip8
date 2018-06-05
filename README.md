@@ -90,7 +90,7 @@ The UniCHIP8Node component provides a basic command interpreter for the commands
 | 0EB7 | rotate | targetGameObject.transform.localRotation = new Vector3(V0, V1, V2) |
 | 0EB8 | scale | targetGameObject.transform.localScale = new Vector3(V0, V1, V2) |
 | 0EB9 | reparent | targetGameObject to parentGameObject, whose name is stored in the string at the address pointed to by V0 and V1 |
-| 0EBA | addMaterial | adds a specular material to targetGameObject |
+| 0EBA | addMaterial | adds a material to targetGameObject |
 | 0EBB | setMaterialColor | sets the targetGameObject main material color |
 | ... | | |
 | 0EF0 | send | send the bytes in the dataport to the targetGameObject |
