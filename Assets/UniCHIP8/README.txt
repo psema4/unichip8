@@ -113,7 +113,7 @@ References
   http://mattmik.com/files/chip8/mastering/chip8.html
   
 Tools
-  http://johnearnest.github.io/Octo/
+  Modified Octo compiler for UniCHIP8 https://github.com/psema4/Octo/tree/feature/UniCHIP8
   
 ROMs
   https://web.archive.org/web/20130903155600/http://chip8.com/downloads/Chip-8%20Pack.zip
