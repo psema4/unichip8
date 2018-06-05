@@ -110,6 +110,7 @@ References
   
 Tools
   Modified Octo compiler for UniCHIP8 https://github.com/psema4/Octo/tree/feature/UniCHIP8
+  UniCHIP8 Tools https://github.com/psema4/unichip8-tools
   
 ROMs
   https://web.archive.org/web/20130903155600/http://chip8.com/downloads/Chip-8%20Pack.zip

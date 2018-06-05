@@ -121,6 +121,7 @@ The UniCHIP8Node component provides a basic command interpreter for the commands
 ## Tools
 
 * Modified [Octo compiler for UniCHIP8](https://github.com/psema4/Octo/tree/feature/UniCHIP8)
+* [UniCHIP8 Tools](https://github.com/psema4/unichip8-tools)
   
 ## ROMs
 
