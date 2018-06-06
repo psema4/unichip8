@@ -49,6 +49,14 @@
 	v3 := 100
 	uc-setMaterialColor
 
+	# rotate the cube
+	v4 := 0
+	loop
+		v4 += 1
+		i := unity-generated
+		uc-rotateY v4
+	again
+
 	uc-halt
 
 

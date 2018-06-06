@@ -872,7 +872,7 @@ public class UniCHIP8 : UniCHIP8Node {
 							string v3 = ((int) V[3]).ToString();
 
 							string commandString = targetName + "|setMaterialColor~" + v0 + "~" + v1 + "~" + v2 + "~" + v3;
-							print ("sending command string: " + commandString);
+							//print ("sending command string: " + commandString);
 							router.SendMessage("Command", commandString);
 						}
 					}

@@ -63,12 +63,12 @@ public class UniCHIP8Node : MonoBehaviour {
 			break;
 
 		case "rotate":
-			args3f = new Vector3 (float.Parse (parts [1]), float.Parse (parts [2]), float.Parse (parts [3]));
+			args3f = new Vector3 (float.Parse (parts [1]) / 255, float.Parse (parts [2]) / 255, float.Parse (parts [3]) / 255);
 			transform.Rotate (args3f);
 			break;
 
 		case "rotateX":
-			args1f = float.Parse (parts[1]);
+			args1f = float.Parse (parts[1]) / 255;
 			tmpVec3 = new Vector3(args1f, transform.localEulerAngles.y, transform.localEulerAngles.z);
 			transform.Rotate (tmpVec3);
 			break;
@@ -80,7 +80,7 @@ public class UniCHIP8Node : MonoBehaviour {
 			break;
 
 		case "rotateZ":
-			args1f = float.Parse (parts[1]);
+			args1f = float.Parse (parts[1]) / 255;
 			tmpVec3 = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, args1f);
 			transform.Rotate (tmpVec3);
 			break;
@@ -146,9 +146,7 @@ public class UniCHIP8Node : MonoBehaviour {
 			
 			a /= 100;
 
-			print ("Setting color: " + r + ", " + g + ", " + b + ", " + a);
 			color = new Color(r, g, b, a);
-			print ("Set color: " + color.ToString());
 			renderer.material.color = color;
 			break;
 
