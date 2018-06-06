@@ -51,7 +51,7 @@ UniCHIP8 Opcode Summary
       create            createCube        createSphere
       createCylinder    createCapsule     createPlane
       createQuad        createEmpty       createDirectionalLight
-	  createPointLight  createAreaLight   createSpotLight
+	  createPointLight  createSpotLight
 
     Materials
       addMaterial       setMaterialColor

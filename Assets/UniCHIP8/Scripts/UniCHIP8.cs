@@ -942,27 +942,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0EC2) { // 0EC2 (createAreaLight) create an empty targetGameObject with a light component
-						print("opcode 0EC2 stub: not available, baked only");
-						/*
-						if (router != null) {
-							print ("Adding Area Light Node");
-							GameObject go = new GameObject();
-							go.name = targetName;
-							go.transform.position = new Vector3(0, 0, 0);
-							go.transform.parent = gameObject.transform;
-
-							Light l = go.AddComponent<Light>();
-							l.type = LightType.Area;
-
-							go.AddComponent<UniCHIP8Node>();
-							go.GetComponent<UniCHIP8Node>().router = router;
-							router.SendMessage("RegisterNode", go);
-						}
-						*/
-					}
-
-					else if ((opcode & 0x0FFF) == 0x0EC3) { // 0EC3 (createSpotLight) create an empty targetGameObject with a light component
+					else if ((opcode & 0x0FFF) == 0x0EC2) { // 0EC2 (createSpotLight) create an empty targetGameObject with a light component
 						if (router != null) {
 							GameObject go = new GameObject();
 							go.name = targetName;
@@ -977,6 +957,12 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage("RegisterNode", go);
 						}
 					}
+
+					/*
+					else if ((opcode & 0x0FFF) == 0x0EC3) { // 0EC3 ()
+						//
+					}
+					*/
 
 					else if ((opcode & 0x0FFF) == 0x0EC4) { // 0EC4 (setLightColor) set the light on targetGameObject to the color in v0-v3
 						if (router != null) {

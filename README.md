@@ -58,7 +58,7 @@ To make the UniCHIP8 aware of other GameObjects in a scene, they must have the U
       create            createCube        createSphere
       createCylinder    createCapsule     createPlane
       createQuad        createEmpty       createDirectionalLight
-	  createPointLight  createAreaLight   createSpotLight
+	  createPointLight  createSpotLight
 
     Materials
       addMaterial       setMaterialColor
