@@ -683,11 +683,23 @@ public class UniCHIP8 : UniCHIP8Node {
 				if (! compatibilityMode) {
 					string targetName = ReadASCIIString(I);
 
-					if ((opcode & 0x0FF0) == 0x0E00) {	// 0E00 router test
+					if ((opcode & 0x0FFF) == 0x0E00) {	// 0E00 router test
 						if (router != null) {
 							router.SendMessage("Command", this.name + "|call~Beep");
 							//router.SendMessage("Data", this.name + "|Hello World!");
 						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0E01) { // 0E01 (call) 
+						if (router != null) {
+							string methodName = ""; // read from v0,v1
+							router.SendMessage("Command", targetName + "|call~" + methodName);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0E02) { // 0E02 (send) send the bytes in the dataport to the targetGameObject
+						string data = ReadASCIIString(dataPortAddress);
+						router.SendMessage ("Data", targetName + "|" + data);
 					}
 
 					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N (moveX) targetGameObject.transform.position.x = V[N]
@@ -868,14 +880,7 @@ public class UniCHIP8 : UniCHIP8Node {
 							router.SendMessage ("Command", targetName + "|destroy");
 					}
 
-					// 0EC0..0EEF
-
-					else if ((opcode & 0x0FFF) == 0x0EF0) { // 0EF0 (send) send the bytes in the dataport to the targetGameObject
-						string data = ReadASCIIString(dataPortAddress);
-						router.SendMessage ("Data", targetName + "|" + data);
-					}
-
-					// 0EF1..0EF8
+					// 0EC0..0EF8
 
 					else if ((opcode & 0x0FFF) == 0x0EF9) { // 0EF9 (logging) enable or disable logging using V0 as flag
 						logging = (V[0] > 0) ? true : false;
