@@ -45,26 +45,30 @@ To make the UniCHIP8 aware of other GameObjects in a scene, they must have the U
 
     Misc
       test              call              broadcast
-	  send              reparent          destroy
+      send              reparent          destroy
 
     Transform
       move              rotate            scale
       moveX             rotateX           scaleX
       moveY             rotateY           scaleY
       moveZ             rotateZ           scaleZ
+	  lookAt
 
     Create
       create            createCube        createSphere
       createCylinder    createCapsule     createPlane
-      createQuad
+      createQuad        createEmpty       createDirectionalLight
+	  createPointLight  createAreaLight   createSpotLight
 
     Materials
       addMaterial       setMaterialColor
+	  
+	Lights
+	  setLightColor     setLightIntensity
 
     Machine state
       clockMultiplier   logging           compatiblityMode
       pause             halt              powerDown
-
 
 See the [UniCHIP8 wiki](https://github.com/psema4/unichip8/wiki) for more information.
    

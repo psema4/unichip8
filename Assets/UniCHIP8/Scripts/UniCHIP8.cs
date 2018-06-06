@@ -865,21 +865,39 @@ public class UniCHIP8 : UniCHIP8Node {
 					}
 					
 					else if ((opcode & 0x0FFF) == 0x0EBB) { // 0EBB (setMaterialColor) sets the targetGameObject main material color
-						if (router != null)
-							router.SendMessage("Command", targetName + "|setMaterialColor~" + V[0] + "~" + V[1] + "~" + V[2] + "~" + V[3]);
+						if (router != null) {
+							string v0 = ((int) V[0]).ToString();
+							string v1 = ((int) V[1]).ToString();
+							string v2 = ((int) V[2]).ToString();
+							string v3 = ((int) V[3]).ToString();
+
+							string commandString = targetName + "|setMaterialColor~" + v0 + "~" + v1 + "~" + v2 + "~" + v3;
+							print ("sending command string: " + commandString);
+							router.SendMessage("Command", commandString);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EBC) { // 0EBC (createEmpty) create targetGameObject as an empty GameObject
+						if (router != null) {
+							GameObject go = new GameObject();
+							go.name = targetName;
+							go.transform.position = new Vector3(0, 0, 0);
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+					}
+					
+					else if ((opcode & 0x0FFF) == 0x0EBD) { // 0EBD (lookAt) targetGameObject looks at another GameObject
+						if (router != null) {					// v0-v1 should point to the address of the string containing the other GameObjects' name
+							ushort stringAddress = (ushort) (((ushort) V[0] << 8) | (ushort) V[1]);
+							string targetObject = ReadASCIIString(stringAddress);
+
+							router.SendMessage("Command", targetName + "|lookAt~" + targetObject);
+						}
 					}
 
 					/*
-					else if ((opcode & 0x0FFF) == 0x0EBC) { // 0EBC () targetGameObject
-						if (router != null)
-							router.SendMessage("Command", targetName + "|");
-					}
-					
-					else if ((opcode & 0x0FFF) == 0x0EBD) { // 0EBD () targetGameObject
-						if (router != null)
-							router.SendMessage("Command", targetName + "|");
-					}
-
 					else if ((opcode & 0x0FFF) == 0x0EBE) { // 0EBE () targetGameObject
 						if (router != null)
 							router.SendMessage("Command", targetName + "|");
@@ -889,6 +907,91 @@ public class UniCHIP8 : UniCHIP8Node {
 					else if ((opcode & 0x0FFF) == 0x0EBF) { // 0EBF (destroy) targetGameObject
 						if (router != null)
 							router.SendMessage ("Command", targetName + "|destroy");
+					}
+
+
+					else if ((opcode & 0x0FFF) == 0x0EC0) { // 0EC0 (createDirectionalLight) create an empty targetGameObject with a light component
+						if (router != null) {
+							GameObject go = new GameObject();
+							go.name = targetName;
+							go.transform.position = new Vector3(0, 0, 0);
+							go.transform.parent = gameObject.transform;
+
+							Light l = go.AddComponent<Light>();
+							l.type = LightType.Directional;
+
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+					}
+					
+					else if ((opcode & 0x0FFF) == 0x0EC1) { // 0EC1 (createPointLight) create an empty targetGameObject with a light component
+						if (router != null) {
+							GameObject go = new GameObject();
+							go.name = targetName;
+							go.transform.position = new Vector3(0, 0, 0);
+							go.transform.parent = gameObject.transform;
+
+							Light l = go.AddComponent<Light>();
+							l.type = LightType.Point;
+
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EC2) { // 0EC2 (createAreaLight) create an empty targetGameObject with a light component
+						print("opcode 0EC2 stub: not available, baked only");
+						/*
+						if (router != null) {
+							print ("Adding Area Light Node");
+							GameObject go = new GameObject();
+							go.name = targetName;
+							go.transform.position = new Vector3(0, 0, 0);
+							go.transform.parent = gameObject.transform;
+
+							Light l = go.AddComponent<Light>();
+							l.type = LightType.Area;
+
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+						*/
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EC3) { // 0EC3 (createSpotLight) create an empty targetGameObject with a light component
+						if (router != null) {
+							GameObject go = new GameObject();
+							go.name = targetName;
+							go.transform.position = new Vector3(0, 0, 0);
+							go.transform.parent = gameObject.transform;
+							
+							Light l = go.AddComponent<Light>();
+							l.type = LightType.Spot;
+
+							go.AddComponent<UniCHIP8Node>();
+							go.GetComponent<UniCHIP8Node>().router = router;
+							router.SendMessage("RegisterNode", go);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EC4) { // 0EC4 (setLightColor) set the light on targetGameObject to the color in v0-v3
+						if (router != null) {
+							string v0 = ((int) V[0]).ToString();
+							string v1 = ((int) V[1]).ToString();
+							string v2 = ((int) V[2]).ToString();
+							string v3 = ((int) V[3]).ToString();
+
+							router.SendMessage ("Command", targetName + "|setLightColor~" + v0 + "~" + v1 + "~" + v2 + "~" + v3);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0EC5) { // 0EC5 (setLightIntensity) set the light on targetGameObject to the intensity in v0
+						if (router != null)
+							router.SendMessage ("Command", targetName + "|setLightIntensity~" + V[0]);
 					}
 
 					// 0EC0..0EF8

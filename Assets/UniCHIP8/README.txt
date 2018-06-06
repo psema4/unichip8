@@ -45,14 +45,19 @@ UniCHIP8 Opcode Summary
       moveX             rotateX           scaleX
       moveY             rotateY           scaleY
       moveZ             rotateZ           scaleZ
+	  lookAt
 
     Create
       create            createCube        createSphere
       createCylinder    createCapsule     createPlane
-      createQuad
+      createQuad        createEmpty       createDirectionalLight
+	  createPointLight  createAreaLight   createSpotLight
 
     Materials
       addMaterial       setMaterialColor
+	  
+	Lights
+	  setLightColor     setLightIntensity
 
     Machine state
       clockMultiplier   logging           compatiblityMode

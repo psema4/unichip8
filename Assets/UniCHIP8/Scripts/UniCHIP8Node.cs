@@ -23,16 +23,17 @@ public class UniCHIP8Node : MonoBehaviour {
 		// arguments processing
 		string[] parts = commandData.Split (new string[] { "~" }, System.StringSplitOptions.None);
 		string   args1s;
+		int      args1i;
 		float    args1f;
 		Vector3  args3f;
 
 		// helpers
 		Vector3 tmpVec3;
 		Renderer renderer = gameObject.GetComponent<Renderer>();
-		int r;
-		int g;
-		int b;
-		int a;
+		float r;
+		float g;
+		float b;
+		float a;
 		Color color;
 
 		// execute
@@ -132,13 +133,56 @@ public class UniCHIP8Node : MonoBehaviour {
 			break;
 
 		case "setMaterialColor":
-			r = int.Parse(parts[1]);
-			g = int.Parse(parts[2]);
-			b = int.Parse(parts[3]);
-			a = int.Parse(parts[4]);
+			r = float.Parse(parts[1]) / 255;
+			g = float.Parse(parts[2]) / 255;
+			b = float.Parse(parts[3]) / 255;
+			a = float.Parse(parts[4]);
+
+			if (a < 1)
+				a = 1;
+			
+			if (a > 100)
+				a = 100;
+			
+			a /= 100;
+
+			print ("Setting color: " + r + ", " + g + ", " + b + ", " + a);
+			color = new Color(r, g, b, a);
+			print ("Set color: " + color.ToString());
+			renderer.material.color = color;
+			break;
+
+		case "lookAt":
+			args1s = parts[1];
+			GameObject targetObject = GameObject.Find(args1s);
+
+			if (targetObject != null) {
+				transform.LookAt(targetObject.transform);
+			}
+			break;
+
+		case "setLightColor":
+			r = float.Parse(parts[1]) / 255;
+			g = float.Parse(parts[2]) / 255;
+			b = float.Parse(parts[3]) / 255;
+			a = float.Parse(parts[4]);
+
+			if (a < 1)
+				a = 1;
+
+			if (a > 100)
+				a = 100;
+
+			a /= 100;
 
 			color = new Color(r, g, b, a);
-			renderer.material.color = color;
+			gameObject.GetComponent<Light>().color = color;
+			break;
+
+		case "setLightIntensity": // 0-100 range
+			args1i = int.Parse (parts[1]);
+			args1f = (float) args1i / 100;
+			gameObject.GetComponent<Light>().intensity = args1f;
 			break;
 
 
