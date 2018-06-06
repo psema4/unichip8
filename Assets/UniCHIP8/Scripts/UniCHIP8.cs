@@ -692,7 +692,8 @@ public class UniCHIP8 : UniCHIP8Node {
 
 					else if ((opcode & 0x0FFF) == 0x0E01) { // 0E01 (call) call a method on the gameObject. v0-v1 should point to the address
 						if (router != null) {				//      of the string containing the the method name
-							string methodName = "ToggleSwitch"; // read from v0,v1
+							ushort stringAddress = (ushort) (((ushort) V[0] << 8) | (ushort) V[1]);
+							string methodName = ReadASCIIString(stringAddress);
 							router.SendMessage("Command", targetName + "|call~" + methodName);
 						}
 					}
