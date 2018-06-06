@@ -690,17 +690,27 @@ public class UniCHIP8 : UniCHIP8Node {
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0E01) { // 0E01 (call) 
-						if (router != null) {
-							string methodName = ""; // read from v0,v1
+					else if ((opcode & 0x0FFF) == 0x0E01) { // 0E01 (call) call a method on the gameObject. v0-v1 should point to the address
+						if (router != null) {				//      of the string containing the the method name
+							string methodName = "ToggleSwitch"; // read from v0,v1
 							router.SendMessage("Command", targetName + "|call~" + methodName);
 						}
 					}
 
-					else if ((opcode & 0x0FFF) == 0x0E02) { // 0E02 (send) send the bytes in the dataport to the targetGameObject
+					else if ((opcode & 0x0FFF) == 0x0E02) { // 0E02 (broadcast) calls a method on the gameObject and all it's children.
+						if (router != null) {				//      v0-v1 should point to the address of the string containing the the method name
+							ushort stringAddress = (ushort) (((ushort) V[0] << 8) | (ushort) V[1]);
+							string methodName = ReadASCIIString(stringAddress);
+							router.SendMessage("Command", targetName + "|broadcast~" + methodName);
+						}
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0E03) { // 0E03 (send) send the bytes in the dataport to the targetGameObject
 						string data = ReadASCIIString(dataPortAddress);
 						router.SendMessage ("Data", targetName + "|" + data);
 					}
+
+					// 0E04..0E0F
 
 					else if ((opcode & 0x0FF0) == 0x0E10) { // 0E1N (moveX) targetGameObject.transform.position.x = V[N]
 						if (router != null)

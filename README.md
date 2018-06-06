@@ -44,8 +44,8 @@ To make the UniCHIP8 aware of other GameObjects in a scene, they must have the U
 ## UniCHIP8 Opcode Summary
 
     Misc
-      test              call              send
-      reparent          destroy
+      test              call              broadcast
+	  send              reparent          destroy
 
     Transform
       move              rotate            scale

@@ -37,8 +37,8 @@ Interacting with Unity
 
 UniCHIP8 Opcode Summary
     Misc
-      test              call              send
-      reparent          destroy
+      test              call              broadcast
+      send              reparent          destroy
 
     Transform
       move              rotate            scale

@@ -113,6 +113,11 @@ public class UniCHIP8Node : MonoBehaviour {
 			gameObject.SendMessage(args1s);
 			break;
 
+		case "broadcast":
+			args1s = parts[1];
+			gameObject.BroadcastMessage(args1s);
+			break;
+
 		case "reparent":
 			args1s = parts[1];
 			GameObject parentObject = GameObject.Find(args1s);
