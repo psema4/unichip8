@@ -12,6 +12,11 @@ public class UniCHIP8 : UniCHIP8Node {
 	[Tooltip("Enable or disable the UniCHIP8.")]
 	public bool powerState;
 
+	private bool interruptFlag;
+	private byte interruptId;
+	private bool interruptRunning;
+	private ushort cacheI;
+
 	[Tooltip("The number of iterations (clock ticks) per FixedUpdate.")]
 	public int clockMultiplier = 1;
 
@@ -146,6 +151,10 @@ public class UniCHIP8 : UniCHIP8Node {
 	}
 
 	void Reset() {
+		interruptFlag = false;
+		interruptId = 0;
+		interruptRunning = false;
+
 		PC = (ushort) bootAddress;
 		SP = 0;
 		I  = 0;
@@ -662,8 +671,33 @@ public class UniCHIP8 : UniCHIP8Node {
 			byte NN    = (byte)   (opcode & 0x00FF);
 			ushort NNN = (ushort) (opcode & 0x0FFF);
 
+			if (!compatibilityMode) {
+				if (interruptFlag) {
+					if (!interruptRunning) {
+						byte msb = ram[(2 * interruptId)];
+						byte lsb = ram[(2 * interruptId + 1)];
+						ushort ptr = (ushort) (((ushort) msb << 8) | (ushort) lsb);
+
+						if (logging)
+							print ("*** Interrupt " + interruptId + " on tick " + tickCount + " ***");
+
+						// execute a call to the interrupt handler (modified from the 2NNN opcode)
+						cacheI = I; // stash the I register
+
+						SP += 1;
+						Stack[SP] = PC;
+						PC = ptr;
+						shouldIncrementPC = false;
+
+						interruptRunning = true;
+						return; // FIXME: on end-of-interrupt, code starts executing at expected PC + 2 - see 0x00EE (return)
+					}
+				}
+			}
+
 			if (logging)
 				LogIteration(opcode);
+
 
 			// decode & execute
 			switch ((opcode & 0xF000)) { // check first nibble
@@ -671,15 +705,28 @@ public class UniCHIP8 : UniCHIP8Node {
 				if (opcode == 0x0000) {
 					// NOP
 				
+				// CHIP8 opcodes
 				} else if ((opcode & 0x00FF) == 0x00E0)	// 00E0 Clear Screen
 					ClearScreen();
 				
 				else if ((opcode & 0x000F) == 0x000E) {	// 00EE Return from Subroutine
 					PC = Stack[SP];
 					SP -= 1;
+
+					// UniCHIP8
+					if (!compatibilityMode) {
+						// end a running interrupt
+						if (interruptRunning) {
+							I = cacheI; // restore the I register
+							PC -= 2; 	// FIXME: We are offset by 2 following an interrupt return.
+
+							interruptRunning = false;
+							interruptFlag = false;
+						}
+					}
 				}
 
-				// Unity integration opcodes
+				// UniCHIP8 opcodes
 				if (! compatibilityMode) {
 					string targetName = ReadASCIIString(I);
 
@@ -709,6 +756,11 @@ public class UniCHIP8 : UniCHIP8Node {
 					else if ((opcode & 0x0FFF) == 0x0E03) { // 0E03 (send) send the bytes in the dataport to the targetGameObject
 						string data = ReadASCIIString(dataPortAddress);
 						router.SendMessage ("Data", targetName + "|" + data);
+					}
+
+					else if ((opcode & 0x0FFF) == 0x0E04) { // 0E04 (interrupt) send the interrupt specified V[N]
+						interruptId = V[0];
+						interruptFlag = true;
 					}
 
 					// 0E04..0E0F
@@ -964,6 +1016,7 @@ public class UniCHIP8 : UniCHIP8Node {
 					}
 					*/
 
+					// CHIP8 opcodes
 					else if ((opcode & 0x0FFF) == 0x0EC4) { // 0EC4 (setLightColor) set the light on targetGameObject to the color in v0-v3
 						if (router != null) {
 							string v0 = ((int) V[0]).ToString();
@@ -1021,7 +1074,8 @@ public class UniCHIP8 : UniCHIP8Node {
 					}
 				}
 				break;
-				
+
+			// CHIP8 opcodes
 			case 0x1000:								// 1NNN Jump to address
 				PC = NNN;
 				shouldIncrementPC = false;
@@ -1245,11 +1299,12 @@ public class UniCHIP8 : UniCHIP8Node {
 					}
 				}
 				
-				else if ((opcode & NN) == 0x0065) {		// FX65 Read V0 through Vx from addresses I through I+VX
+				else if ((opcode & NN) == 0x0065) {		// FX65 Read V0 through V[V[X]] from addresses I through I+VX
 					byte numRegistersToLoad = (byte) (V[X] & 0x0F);
 
-					for (int i = 0; i <= numRegistersToLoad; i++)
+					for (int i = 0; i <= numRegistersToLoad; i++) {
 						V [i] = ram [(I + i)];
+					}
 				}
 				
 				break;
