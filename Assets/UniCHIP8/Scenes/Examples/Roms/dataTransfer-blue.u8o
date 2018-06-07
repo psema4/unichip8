@@ -1,0 +1,92 @@
+# Chip8 is a virtual machine designed in 1977 for programming video games.
+# UniCHIP8 is an implementation of CHIP8 for Unity 3D.
+# Octo is a high level assembler, disassembler and simulator for Chip8.
+#
+# program:
+#     dataTransfer-blue.u8o | an echo server
+#
+# about:
+#
+#
+#
+
+: main
+	# install interrupt handlers
+
+	:unpack 0x0 collision-handler
+	i := 0
+	save v1
+
+	:unpack 0x0 data-port-handler
+	i := 2
+	save v1
+
+
+
+	# hang, wait for interrupts
+: bgn
+	v0 := 0
+	jump bgn
+
+
+# UniCHIP8.cs handles stashing and restoring the I register
+# here we handle stashing registers v0-vB before executing the 
+# interrupt processing and pop them again before returning.
+# vD-vF can be modified to return data
+
+: collision-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	v1 := 3
+	v2 := 1
+	vD := 0xA
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: data-port-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+
+	# loop 10 times...
+	v0 := 0
+	loop
+		v0 += 1
+		if v0 != 10 then
+	again
+
+        # ... then echo the message back (it's already in the data port)
+        i := unity-red-cpu
+        uc-send
+
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: i-stash
+	0x00 0x00
+
+: register-stash
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+
+: unity-red-cpu
+        0x52 0x65 0x64 0x20 0x43 0x50 0x55 0x00
+
+: unity-blue-cpu
+        0x42 0x6c 0x75 0x65 0x20 0x43 0x50 0x55 0x00
+

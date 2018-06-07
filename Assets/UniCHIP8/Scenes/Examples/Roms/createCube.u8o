@@ -1,0 +1,71 @@
+# Chip8 is a virtual machine designed in 1977 for programming video games.
+# UniCHIP8 is an implementation of CHIP8 for Unity 3D.
+# Octo is a high level assembler, disassembler and simulator for Chip8.
+#
+# program:
+#     createCube.u8o
+#
+# about:
+#     centers the world-space, creates a cube and colors it.
+#
+#
+
+: main
+	# move the camera
+	i := unity-main-camera
+	v0 := 127
+	v1 := 127
+	v2 := 125
+	uc-move
+
+	# move the UniCHIP8
+	i := unity-unichip8
+	v0 := 125
+	v1 := 127
+	v2 := 127
+	uc-move
+
+
+	# create a new Unity GameObject called "Generated" from a cube primitive
+	i := unity-generated
+	uc-createCube
+
+	# move "Generated" to new Vector3(v0, v1, v2)
+	i := unity-generated
+	v0 := 127
+	v1 := 127
+	v2 := 127
+	uc-move
+
+	# add a material
+	i := unity-generated
+	uc-addMaterial
+
+	# set the color
+	i := unity-generated
+	v0 := 127
+	v1 := 0
+	v2 := 127
+	v3 := 100
+	uc-setMaterialColor
+
+	# rotate the cube
+	v4 := 0
+	loop
+		v4 += 1
+		i := unity-generated
+		uc-rotateY v4
+	again
+
+	uc-halt
+
+
+: unity-main-camera
+        0x4d 0x61 0x69 0x6e 0x20 0x43 0x61 0x6d 0x65 0x72 0x61 0x00
+
+: unity-unichip8
+        0x55 0x6e 0x69 0x43 0x48 0x49 0x50 0x38 0x00
+
+: unity-generated
+	0x47 0x65 0x6E 0x65 0x72 0x61 0x74 0x65 0x64 0x00
+
