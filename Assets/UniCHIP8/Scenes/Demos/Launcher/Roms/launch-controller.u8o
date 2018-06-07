@@ -1,0 +1,159 @@
+# Chip8 is a virtual machine designed in 1977 for programming video games.
+# UniCHIP8 is an implementation of CHIP8 for Unity 3D.
+# Octo is a high level assembler, disassembler and simulator for Chip8.
+#
+# program:
+# 	launch-controller.u8o
+#
+# about:
+# 	After receiving an authorization signal (interrupt 2), count 
+#	down to 0, then uc-send the launchrocket-command to the 
+#	unity-launcher GameObject
+#
+#
+
+: main
+	# install interrupt handlers
+	v1 := 1
+
+	:unpack 0x0 collision-handler
+	i := 0
+	save v1
+
+	:unpack 0x0 data-port-handler
+	i := 2
+	save v1
+
+	:unpack 0x0 authorization-handler
+	i := 4
+	save v1
+
+: wait
+	vD := 0
+
+	loop
+		v0 += 0
+		if vD != 1 then
+	again
+
+: countdown
+	v6 := 10
+
+	loop
+		v0 := v6
+		display-counter
+
+		v7 := 0
+
+		loop
+			v7 += 1
+			if v7 != 10 then
+		again
+
+		v6 += -1
+
+		# uc-pause
+		v0 += 0
+
+		if v6 != 0 then
+	again
+
+: launch
+	v0 := v6
+	display-counter
+	
+	:unpack 0x0 launchrocket-command
+	i := unity-launcher
+	uc-broadcast
+
+	v0 := 0
+	uc-halt
+
+: display-counter
+	clear
+
+	i := 0x120
+	bcd v0
+
+	v5 := 2
+	load v5
+
+	v3 := 1
+	v4 := 1
+	i := hex v0
+	sprite v3 v4 5
+
+	v3 += 5
+	i := hex v1
+	sprite v3 v4 5
+
+	v3 += 5
+	i := hex v2
+	sprite v3 v4 5
+
+	return
+
+# UniCHIP8.cs handles stashing and restoring the I register
+# here we handle stashing registers v0-vB before executing the 
+# interrupt processing and pop them again before returning.
+# vD-vF can be modified to return data
+
+: collision-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	# handle
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: data-port-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	# handle
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: authorization-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	# initiate launch countdown
+	vD := 1
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: i-stash
+	0x00 0x00
+
+: register-stash
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+
+: unity-launcher
+        0x4c 0x61 0x75 0x6e 0x63 0x68 0x65 0x72 0x00
+
+: launchrocket-command
+        0x4c 0x61 0x75 0x6e 0x63 0x68 0x52 0x6f 0x63 0x6b 0x65 0x74 0x00
+
