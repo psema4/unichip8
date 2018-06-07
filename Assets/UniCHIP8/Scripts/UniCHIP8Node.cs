@@ -109,6 +109,11 @@ public class UniCHIP8Node : MonoBehaviour {
 			break;
 
 		// other commands
+		case "interrupt":
+			args1i = int.Parse (parts[1]);
+			gameObject.SendMessage("Interrupt", args1i);
+			break;
+
 		case "call":
 			args1s = parts[1];
 			gameObject.SendMessage(args1s);

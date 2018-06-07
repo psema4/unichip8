@@ -546,7 +546,7 @@ public class UniCHIP8 : UniCHIP8Node {
 		return "0x" + ToHex (u);
 	}
 
-	void WriteASCIIString(ushort address, string str) {
+	public void WriteASCIIString(ushort address, string str) {
 		int length = str.Length;
 
 		if (length > 31)
@@ -558,7 +558,7 @@ public class UniCHIP8 : UniCHIP8Node {
 		ram[(address + length + 1)] = 0; // add terminal null byte
 	}
 
-	string ReadASCIIString(ushort address) {
+	public string ReadASCIIString(ushort address) {
 		int maxLength = 32;
 		int length = 0;
 		int i = 0;
@@ -678,8 +678,7 @@ public class UniCHIP8 : UniCHIP8Node {
 						byte lsb = ram[(2 * interruptId + 1)];
 						ushort ptr = (ushort) (((ushort) msb << 8) | (ushort) lsb);
 
-						if (logging)
-							print ("*** Interrupt " + interruptId + " on tick " + tickCount + " ***");
+						print ("*** Interrupt " + interruptId + " on " + this.name + " at tick " + tickCount + " ***");
 
 						// execute a call to the interrupt handler (modified from the 2NNN opcode)
 						cacheI = I; // stash the I register
@@ -732,8 +731,9 @@ public class UniCHIP8 : UniCHIP8Node {
 
 					if ((opcode & 0x0FFF) == 0x0E00) {	// 0E00 router test
 						if (router != null) {
-							router.SendMessage("Command", this.name + "|call~Beep");
+							//router.SendMessage("Command", this.name + "|call~Beep");
 							//router.SendMessage("Data", this.name + "|Hello World!");
+							router.SendMessage ("Command", this.name + "|interrupt~0");
 						}
 					}
 
@@ -759,8 +759,7 @@ public class UniCHIP8 : UniCHIP8Node {
 					}
 
 					else if ((opcode & 0x0FFF) == 0x0E04) { // 0E04 (interrupt) send the interrupt specified V[N]
-						interruptId = V[0];
-						interruptFlag = true;
+						Interrupt(V[0]);
 					}
 
 					// 0E04..0E0F
@@ -1347,12 +1346,31 @@ public class UniCHIP8 : UniCHIP8Node {
 		} // end iteration
 	}
 
+	public void Interrupt(byte id) {
+		byte msb = ram[(2 * id)];
+		byte lsb = ram[(2 * id + 1)];
+		ushort ptr = (ushort) (((ushort) msb << 8) | (ushort) lsb);
+
+		if (ptr > 0) {
+			interruptId = id;
+			interruptFlag = true;
+
+		} else {
+			print ("Interrupt " + id + ": handler not installed.");
+		}
+	}
+
+	public void Interrupt(int id) {
+		Interrupt ((byte) id);
+	}
+
 	override public void Receive(string data) {
-		print ("\"" + name + "\" received data: \"" + data + "\" (STUB: CALL AN INTERRUPT HANDLER!)");
+		if (logging)
+			print ("\"" + name + "\" received data: \"" + data + "\"");
 		
 		if (hasDataPort) {
 			WriteASCIIString(dataPortAddress, data);
-			// execute an "interrupt" to process the data (ie. handle GameObject collisions)
+			Interrupt (1);
 		}
 	}
 }

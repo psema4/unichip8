@@ -3,50 +3,113 @@
 # Octo is a high level assembler, disassembler and simulator for Chip8.
 #
 # program:
-#     dataTransfer-red.u8o
+#     dataTransfer-red.u8o | an echo server test
 #
 # about:
 #
 #
 #
 
-
 : main
-	# send a message to the blue CPU
+	# install interrupt handlers
 
-	# copy from unity-hello to the dataport at 3408
-	i := 3408
-        v0 := 0x48
-	save v0
+	:unpack 0x0 collision-handler
+	i := 0
+	save v1
 
-	i := 3409
-	v0 := 0x65
-	save v0
+	:unpack 0x0 data-port-handler
+	i := 2
+	save v1
 
-	i := 3410
-	v0 := 0x6c
-	save v0
 
-	i := 3411
-	v0 := 0x6c
-	save v0
-
-	i := 3412
-	v0 := 0x6f
-	save v0
-
-	i := 3413
-	v0 := 0x00
-	save v0
+	# send a message to Blue CPU
+	# copy "hi" to the dataport
+	i := 0xD50
+	v0 := 0x69
+	v1 := 0x48
+	v2 := 0x00
+	v5 := 2
+	save v5
 
 	i := unity-blue-cpu
 	uc-send
 
-	uc-halt
+	i := 0xD50
+	v0 := 0x00
+	v1 := 0x00
+	v2 := 0x00
+	save v5
+
+	# hang, wait for interrupts
+	# Blue CPU should echo back our message; if successful
+	# find the message copied to RAM at 0x020 (32)
+
+: bgn
+	v0 := 0
+	jump bgn
 
 
-: unity-main-camera
-        0x4d 0x61 0x69 0x6e 0x20 0x43 0x61 0x6d 0x65 0x72 0x61 0x00
+# UniCHIP8.cs handles stashing and restoring the I register
+# here we handle stashing registers v0-vB before executing the 
+# interrupt processing and pop them again before returning.
+# vD-vF can be modified to return data
+
+: collision-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	# handle collisions
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: data-port-handler
+	# stash registers
+	i := register-stash
+	vC := 0xB
+	save vC
+
+	# copy the data over to the reserved interupt data area
+	vC := 7
+
+	i := 0xD50
+	load vC
+	i := 0x020
+	save vC
+	i := 0xD58
+	load vC
+	i := 0x028
+	save vC
+
+	i := 0xD60
+	load vC
+	i := 0x030
+	save vC
+	i := 0xD68
+	load vC
+	i := 0x038
+	save vC
+
+
+	# pop registers
+	i := register-stash
+	vC := 0xB
+	load vC
+
+	return
+
+: i-stash
+	0x00 0x00
+
+: register-stash
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 
 : unity-red-cpu
         0x52 0x65 0x64 0x20 0x43 0x50 0x55 0x00
@@ -54,8 +117,3 @@
 : unity-blue-cpu
         0x42 0x6c 0x75 0x65 0x20 0x43 0x50 0x55 0x00
 
-: unity-hello
-        0x48 0x65 0x6c 0x6c 0x6f 0x00
-
-: unity-hi
-        0x48 0x69 0x00

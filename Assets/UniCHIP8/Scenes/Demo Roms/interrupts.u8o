@@ -6,8 +6,8 @@
 #     interrupts.u8o
 #
 # about:
-#     test UniCHIP8 interrupts
-#
+#     1. installs UniCHIP8 interrupt handlers
+#     2. waits for interrupts to be triggered from the running scene
 #
 
 : main
@@ -22,15 +22,14 @@
 	save v1
 
 
-	# trigger interrupt
+	# trigger interrupt via 0E00 test
+	#uc-test
 
-	vD := 9
-	v1 := 1
-	v2 := 2
-
-	# set the interrupt id and call it
+	# hang, trigger interrupts from the scene or UI
+: bgn
 	v0 := 0
-	uc-interrupt
+	jump bgn
+
 
 	v0 += 0 # FIXME: NEED AN INSTRUCTION BETWEEN uc-interrupt
 	uc-halt #        AND uc-halt; RELATED TO 00EE OFF-BY-2 BUG?
@@ -81,5 +80,3 @@
 	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 	0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 
-: test-pointer
-	0xFF 0xFE
