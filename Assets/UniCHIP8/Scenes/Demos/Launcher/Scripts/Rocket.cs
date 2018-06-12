@@ -4,38 +4,28 @@ using System.Collections;
 public class Rocket : MonoBehaviour {
 	public int fuel = 500;
 	private int startingFuel;
-	[HideInInspector]
-	public float thrust;
-	private bool inFlight = false;
-	private Rigidbody rb;
+	public bool inFlight = false;
+	private ConstantForce cf;
 
 	void Start() {
-		rb = GetComponent<Rigidbody> ();
 		startingFuel = fuel;
+		cf = GetComponent<ConstantForce> ();
+		cf.enabled = false;
 	}
 
-	void FixedUpdate () {
+	void FixedUpdate() {
 		if (inFlight) {
-			thrust = fuel / 10f;
-			rb.AddForce (Vector3.up * (thrust * Time.deltaTime), ForceMode.Acceleration);
-
 			if (fuel > 0) {
+				cf.enabled = true;
 				fuel -= 1;
 
 			} else {
 				inFlight = false;
-			}
-
-		} else {
-			if (transform.position.y > 50) {
-				rb.useGravity = true;
-				rb.mass = 0.01f;
-				
-			} else if (transform.position.y < 25) {
-				rb.useGravity = false;
 				fuel = startingFuel;
 			}
 
+		} else {
+			cf.enabled = false;
 		}
 	}
 
