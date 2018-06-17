@@ -26,3 +26,9 @@ ExportedObj/
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
+
+# Project specific
+Screenshots
+Assets/_Tools
+Assets/_Tools.meta
+
