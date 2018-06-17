@@ -147,6 +147,10 @@ public class UniCHIP8 : UniCHIP8Node {
 			router.BroadcastMessage("RegisterNode", gameObject);
 		}
 
+		if (hasScreen) {
+			screenObject.SetActive(true);
+		}
+
 		Reset();
 	}
 
